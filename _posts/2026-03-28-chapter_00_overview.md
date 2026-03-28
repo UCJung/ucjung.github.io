@@ -1,8 +1,13 @@
 ---
+layout: post
 title: "Chat.00: 개요. AI Agent란 무엇인가 ?"
 date: 2026-03-28 21:32:00 +0900
+description: AI Agent를 협업 파트너로 바라보는 관점과 도입 절차
 categories: [Claude Code, User Guide]
-tags: [ClaudeCode, User Guide, AIAgent, Install]
+tags: [ClaudeCode, AIAgent]
+giscus_comments: true
+toc:
+  sidebar: left
 ---
 
 
