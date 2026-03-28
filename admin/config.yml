@@ -1,0 +1,24 @@
+backend:
+  name: github
+  repo: UCJung/ucjung.github.io
+  branch: main
+  auth_type: pkce
+  app_id: "Ov23liKFaGaIA8oVXx7I"
+
+media_folder: "assets/img"
+public_folder: "/assets/img"
+
+collections:
+  - name: "posts"
+    label: "Posts"
+    folder: "_posts"
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    fields:
+      - { label: "Title", name: "title", widget: "string" }
+      - { label: "Date", name: "date", widget: "datetime", format: "YYYY-MM-DD HH:mm:ss ZZ" }
+      - { label: "Categories", name: "categories", widget: "list" }
+      - { label: "Tags", name: "tags", widget: "list" }
+      - { label: "TOC", name: "toc", widget: "boolean", default: true }
+      - { label: "Comments", name: "comments", widget: "boolean", default: true }
+      - { label: "Body", name: "body", widget: "markdown" }

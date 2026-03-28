@@ -1,0 +1,2580 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Agent 실전 활용 가이드 — 통합본</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --navy: #1A2332;
+    --navy-mid: #243044;
+    --navy-light: #2D3D54;
+    --accent: #FF6600;
+    --accent-soft: #FF8833;
+    --accent-glow: rgba(255, 102, 0, 0.15);
+    --teal: #0D9488;
+    --teal-soft: #14B8A6;
+    --blue: #3B82F6;
+    --blue-soft: #60A5FA;
+    --emerald: #10B981;
+    --amber: #F59E0B;
+    --rose: #F43F5E;
+    --text: #F1F5F9;
+    --text-muted: #94A3B8;
+    --text-dim: #64748B;
+    --border: rgba(255,255,255,0.08);
+    --border-accent: rgba(255,102,0,0.3);
+    --purple: #A78BFA;
+    --purple-soft: #C4B5FD;
+    --slide-w: 1280px;
+    --slide-h: 720px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: #0F1724;
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .deck {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    padding: 40px 20px;
+  }
+
+  /* ─── Slide Frame ─── */
+  .slide {
+    width: var(--slide-w);
+    height: var(--slide-h);
+    background: var(--navy);
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    box-shadow: 0 4px 40px rgba(0,0,0,0.4);
+    flex-shrink: 0;
+  }
+
+  /* ─── Header ─── */
+  .slide-header {
+    background: linear-gradient(135deg, var(--accent) 0%, #E65500 100%);
+    padding: 20px 40px 16px;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .slide-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1px;
+    background: rgba(255,255,255,0.2);
+  }
+  .slide-num {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    opacity: 0.7;
+    margin-bottom: 4px;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .slide-title {
+    font-size: 29px;
+    font-weight: 800;
+    line-height: 1.25;
+    letter-spacing: -0.3px;
+  }
+
+  /* ─── Summary bar ─── */
+  .slide-summary {
+    padding: 12px 40px;
+    background: var(--navy-mid);
+    border-bottom: 1px solid var(--border);
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    line-height: 1.5;
+  }
+  .slide-summary strong {
+    color: var(--accent-soft);
+    font-weight: 600;
+  }
+
+  /* ─── Content Area (left + right) ─── */
+  .slide-body {
+    flex: 1;
+    display: flex;
+    gap: 0;
+    overflow: hidden;
+  }
+  .body-left {
+    flex: 1;
+    padding: 24px 32px 24px 40px;
+    overflow-y: auto;
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .body-right {
+    flex: 1;
+    padding: 24px 40px 24px 32px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  .body-right > * {
+    width: 100%;
+  }
+
+  /* ─── Reusable components ─── */
+  .section-label {
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    color: var(--accent);
+    margin-bottom: 12px;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  .desc-block {
+    margin-bottom: 20px;
+  }
+  .desc-block h4 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .desc-block p, .desc-block li {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text-muted);
+  }
+  .desc-block ul {
+    list-style: none;
+    padding: 0;
+  }
+  .desc-block ul li {
+    padding-left: 16px;
+    position: relative;
+    margin-bottom: 4px;
+  }
+  .desc-block ul li::before {
+    content: '›';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .tag {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .tag-accent { background: var(--accent-glow); color: var(--accent-soft); border: 1px solid var(--border-accent); }
+  .tag-teal { background: rgba(13,148,136,0.15); color: var(--teal-soft); border: 1px solid rgba(13,148,136,0.3); }
+  .tag-blue { background: rgba(59,130,246,0.15); color: var(--blue-soft); border: 1px solid rgba(59,130,246,0.3); }
+  .tag-rose { background: rgba(244,63,94,0.12); color: #FB7185; border: 1px solid rgba(244,63,94,0.25); }
+
+  .callout {
+    background: var(--accent-glow);
+    border-left: 3px solid var(--accent);
+    padding: 12px 16px;
+    border-radius: 0 6px 6px 0;
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.6;
+    margin-top: 12px;
+  }
+  .callout strong { color: var(--accent-soft); }
+
+  /* ─── Table ─── */
+  .mini-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-bottom: 12px;
+  }
+  .mini-table th {
+    text-align: left;
+    padding: 8px 10px;
+    background: var(--navy-light);
+    color: var(--accent-soft);
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border);
+  }
+  .mini-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-muted);
+    line-height: 1.5;
+    vertical-align: top;
+  }
+  .mini-table td:first-child {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  /* ─── Flow / Diagram ─── */
+  .flow-v {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+  .flow-box {
+    width: 280px;
+    padding: 14px 18px;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.4;
+    position: relative;
+  }
+  .flow-box.person {
+    background: rgba(59,130,246,0.12);
+    border: 1px solid rgba(59,130,246,0.3);
+    color: var(--blue-soft);
+  }
+  .flow-box.agent {
+    background: var(--accent-glow);
+    border: 1px solid var(--border-accent);
+    color: var(--accent-soft);
+  }
+  .flow-box.result {
+    background: rgba(16,185,129,0.12);
+    border: 1px solid rgba(16,185,129,0.3);
+    color: var(--emerald);
+  }
+  .flow-box .sub {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text-dim);
+    display: block;
+    margin-top: 4px;
+  }
+  .flow-arrow {
+    width: 2px;
+    height: 20px;
+    background: var(--text-dim);
+    position: relative;
+  }
+  .flow-arrow::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: -4px;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid var(--text-dim);
+  }
+
+  /* ─── Horizontal flow ─── */
+  .flow-h {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    justify-content: center;
+  }
+  .flow-h .flow-box { width: auto; min-width: 100px; padding: 10px 14px; font-size: 13px; }
+  .flow-arrow-h {
+    width: 28px;
+    height: 2px;
+    background: var(--text-dim);
+    position: relative;
+    flex-shrink: 0;
+  }
+  .flow-arrow-h::after {
+    content: '';
+    position: absolute;
+    right: -4px;
+    top: -4px;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-left: 6px solid var(--text-dim);
+  }
+
+  /* ─── Role split diagram ─── */
+  .role-split {
+    display: flex;
+    gap: 16px;
+    align-items: stretch;
+  }
+  .role-col {
+    flex: 1;
+    border-radius: 8px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .role-col.human {
+    background: rgba(59,130,246,0.08);
+    border: 1px solid rgba(59,130,246,0.2);
+  }
+  .role-col.ai {
+    background: rgba(255,102,0,0.08);
+    border: 1px solid rgba(255,102,0,0.2);
+  }
+  .role-col h5 {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .role-col.human h5 { color: var(--blue-soft); }
+  .role-col.ai h5 { color: var(--accent-soft); }
+  .role-item {
+    font-size: 13px;
+    color: var(--text-muted);
+    padding: 6px 10px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 4px;
+    line-height: 1.4;
+  }
+
+  /* ─── Code block ─── */
+  .code-example {
+    background: #0D1520;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--text-muted);
+    overflow-x: auto;
+    white-space: pre-wrap;
+  }
+  .code-example .prompt { color: var(--teal-soft); }
+  .code-example .comment { color: var(--text-dim); }
+  .code-example .highlight { color: var(--accent-soft); }
+  .code-example .keyword { color: var(--blue-soft); }
+
+  /* ─── Step cycle ─── */
+  .cycle-container {
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px 0;
+  }
+  .cycle-ring {
+    width: 320px;
+    height: 320px;
+    position: relative;
+  }
+  .cycle-node {
+    position: absolute;
+    width: 120px;
+    text-align: center;
+    padding: 12px 8px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  .cycle-node .step-num {
+    display: block;
+    font-size: 11px;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+    margin-bottom: 4px;
+    opacity: 0.6;
+  }
+  .cycle-center {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-dim);
+    line-height: 1.4;
+  }
+
+  /* ─── Step cards (for step 3 cycle) ─── */
+  .step-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .step-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+  }
+  .step-card .num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .step-card .num.n1 { background: rgba(59,130,246,0.2); color: var(--blue-soft); }
+  .step-card .num.n2 { background: var(--accent-glow); color: var(--accent-soft); }
+  .step-card .num.n3 { background: rgba(16,185,129,0.15); color: var(--emerald); }
+  .step-card .num.n4 { background: rgba(245,158,11,0.15); color: var(--amber); }
+  .step-card .label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.4;
+  }
+  .step-card .label span {
+    display: block;
+    font-weight: 400;
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+
+  /* ─── Scale bar ─── */
+  .scale-track {
+    display: flex;
+    align-items: stretch;
+    gap: 2px;
+    margin-top: 8px;
+  }
+  .scale-item {
+    flex: 1;
+    padding: 10px 8px;
+    text-align: center;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+  .scale-item .phase { display: block; font-size: 11px; font-weight: 400; margin-top: 4px; opacity: 0.7; }
+  .s1 { background: rgba(59,130,246,0.15); color: var(--blue-soft); }
+  .s2 { background: rgba(13,148,136,0.15); color: var(--teal-soft); }
+  .s3 { background: var(--accent-glow); color: var(--accent-soft); }
+  .s4 { background: rgba(16,185,129,0.15); color: var(--emerald); }
+
+  /* ─── Comparison row ─── */
+  .compare-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .compare-card {
+    flex: 1;
+    padding: 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+  .compare-card h5 {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .compare-card p {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text-muted);
+  }
+
+  /* ─── Limit/hierarchy cards ─── */
+  .limit-card {
+    padding: 14px 18px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    border: 1px solid var(--border);
+  }
+  .limit-card .num {
+    font-size: 12px;
+    font-weight: 700;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+    margin-bottom: 4px;
+  }
+  .limit-card .title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .limit-card .desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  /* page indicator */
+  .slide-footer {
+    position: absolute;
+    bottom: 12px;
+    right: 24px;
+    font-size: 11px;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--text-dim);
+  }
+
+  .callout-rose{background:rgba(244,63,94,0.08);border-left:3px solid var(--rose);margin-top:12px;padding:12px 16px;border-radius:0 6px 6px 0;font-size:13px;color:var(--text-muted);line-height:1.6}
+  .callout-rose strong{color:#FB7185}
+  .tag-emerald{background:rgba(16,185,129,0.12);color:var(--emerald);border:1px solid rgba(16,185,129,0.25)}
+  .flow-arrow-down{width:2px;height:14px;background:var(--text-dim);margin:0 auto;position:relative}
+  .flow-arrow-down::after{content:"";position:absolute;bottom:-4px;left:-4px;border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid var(--text-dim)}
+  .code-example .danger{color:#FB7185}.code-example .success{color:var(--emerald)}
+
+</style>
+</head>
+<body>
+<div class="deck">
+
+<!-- ====== SLIDE 1: 통합 표지 ====== -->
+<div class="slide" style="justify-content: center; align-items: center; background: linear-gradient(160deg, var(--navy) 0%, #0F1724 60%, var(--navy) 100%);">
+  <div style="text-align: center; padding: 60px;">
+    <div style="font-size: 14px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; color: var(--accent); margin-bottom: 24px; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;">AI Agent 사용자 교육 가이드</div>
+    <h1 style="font-size: 50px; font-weight: 800; line-height: 1.2; letter-spacing: -1px; margin-bottom: 20px;">AI Agent 실전 활용 가이드</h1>
+    <div style="width: 60px; height: 3px; background: var(--accent); margin: 0 auto 24px;"></div>
+    <p style="font-size: 20px; color: var(--text-muted); font-weight: 400; line-height: 1.6;">개요 · 기초편 · 심화편 — 통합본</p>
+    <div style="margin-top: 48px; font-size: 13px; color: var(--text-dim); font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;">2026-03-27</div>
+    <div style="margin-top: 12px; font-size: 14px; color: var(--text-muted); font-weight: 400;">정우철 (mykumi@gmail.com)</div>
+  </div>
+  <div class="slide-footer">1 / 41</div>
+</div>
+
+<!-- ==================== SLIDE 2: AI Agent를 어떻게 바라볼 것인가 ==================== -->
+<div class="slide">
+  <div class="slide-header">
+    <div class="slide-num">Section 0.1</div>
+    <div class="slide-title">AI Agent를 어떻게 바라볼 것인가?</div>
+  </div>
+  <div class="slide-summary">
+    흔한 세 가지 관점과 그 한계 — 그리고 <strong>이 가이드가 제안하는 관점</strong>
+  </div>
+  <div class="slide-body">
+    <div class="body-left">
+      <div class="section-label">일반적인 관점과 한계</div>
+      <table class="mini-table">
+        <tr><th>관점</th><th>기대</th><th>한계</th></tr>
+        <tr><td>유용한 도구</td><td>버튼 누르면 결과</td><td>"알아서 해줘" → 의도와 다른 결과</td></tr>
+        <tr><td>편리한 자동화</td><td>반복 작업 대체</td><td>맥락 없는 자동화는 오류 양산</td></tr>
+        <tr><td>대신하는 존재</td><td>시키면 다 해줌</td><td>검증 없는 수용 → 품질 사고</td></tr>
+      </table>
+      <div class="callout">
+        <strong>이 가이드의 관점:</strong> AI Agent는 도구가 아니라 <strong>Cowork 대상</strong>입니다.<br>
+        부족한 부분을 채울 수 있는 협업 파트너 혹은 동료로 바라봅니다.
+      </div>
+    </div>
+    <div class="body-right">
+      <div class="section-label">관점에 따른 활용 수준</div>
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div style="width:50px; text-align:center; font-size: 26px;">🔧</div>
+          <div style="flex:1; height:32px; border-radius:6px; background:linear-gradient(90deg, rgba(100,116,139,0.3) 30%, transparent 30%); display:flex; align-items:center; padding-left:12px; font-size: 13px; color:var(--text-dim);">도구 — 시키는 것에 머묾</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div style="width:50px; text-align:center; font-size: 26px;">⚙️</div>
+          <div style="flex:1; height:32px; border-radius:6px; background:linear-gradient(90deg, rgba(245,158,11,0.25) 55%, transparent 55%); display:flex; align-items:center; padding-left:12px; font-size: 13px; color:var(--amber);">자동화 — 반복 효율화</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div style="width:50px; text-align:center; font-size: 26px;">🤝</div>
+          <div style="flex:1; height:32px; border-radius:6px; background:linear-gradient(90deg, var(--accent-glow) 0%, rgba(255,102,0,0.35) 90%); border:1px solid var(--border-accent); display:flex; align-items:center; padding-left:12px; font-size: 13px; color:var(--accent-soft); font-weight:600;">협업 파트너 — 함께 일하며 성과 확장</div>
+        </div>
+      </div>
+      <div style="margin-top:24px; padding:14px; border-radius:8px; background:rgba(255,255,255,0.03); border:1px solid var(--border);">
+        <div style="font-size: 14px; color:var(--text); font-weight:600; margin-bottom:6px;">핵심 전환</div>
+        <div style="font-size: 13px; color:var(--text-muted); line-height:1.6;">
+          "AI Agent가 내 일을 <span style="color:var(--rose);">대신한다</span>"<br>
+          → "AI Agent와 함께 하면 혼자보다<br>&nbsp;&nbsp;&nbsp;&nbsp;더 많은 일을 더 잘 <span style="color:var(--emerald);">해낼 수 있다</span>"
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">2 / 41</div>
+</div>
+
+
+<!-- ==================== SLIDE 3: 예시① 시니어 + AI(주니어) ==================== -->
+<div class="slide">
+  <div class="slide-header">
+    <div class="slide-num">Section 0.3 — 실전 예시 ①</div>
+    <div class="slide-title">시니어 + AI Agent(주니어 역할) 협업</div>
+  </div>
+  <div class="slide-summary">
+    주니어 인력이 없는 팀 — 시니어가 설계에 집중하고, <strong>구현·문서화·테스트를 AI Agent에 위임</strong>
+  </div>
+  <div class="slide-body">
+    <div class="body-left">
+      <div class="section-label">상황</div>
+      <div class="desc-block">
+        <p>시니어가 설계부터 코딩·문서화·테스트까지 전부 수행 중. 설계에 집중할 수 없는 구조.</p>
+      </div>
+      <div class="section-label">역할 분담 원칙</div>
+      <table class="mini-table">
+        <tr><th>원칙</th><th>설명</th></tr>
+        <tr><td>설계는 사람</td><td>AI Agent는 설계를 "실행"하는 역할</td></tr>
+        <tr><td>지시는 명확하게</td><td>주니어에게 "알아서 해"는 위험</td></tr>
+        <tr><td>결과는 반드시 검증</td><td>코드 리뷰 없이 배포하지 않는 것과 동일</td></tr>
+        <tr><td>산출물은 파일로</td><td>구두 보고 ✕ → 문서 기반 소통 ✓</td></tr>
+      </table>
+      <div class="callout">
+        시니어는 <strong>고부가가치 업무(설계·검증)에 집중</strong>,<br>실행 업무를 AI Agent에 위임하여 병목 해소
+      </div>
+    </div>
+    <div class="body-right">
+      <div class="section-label">협업 흐름</div>
+      <div class="flow-v">
+        <div class="flow-box person">① 요구사항 분석 · 설계 <span class="sub">시니어 (사람)</span></div>
+        <div class="flow-arrow"></div>
+        <div class="flow-box person">② 구현 지시 <span class="sub">설계문서 + 스택 + 범위 + 저장경로</span></div>
+        <div class="flow-arrow"></div>
+        <div class="flow-box agent">③ 코드 구현 + 테스트 + 보고서 <span class="sub">AI Agent (주니어 역할)</span></div>
+        <div class="flow-arrow"></div>
+        <div class="flow-box person">④ 코드 리뷰 · 검증 <span class="sub">시니어 — 보고서 기준 확인</span></div>
+        <div class="flow-arrow"></div>
+        <div class="flow-box result">⑤ 릴리즈 판단 · 배포 <span class="sub">문제 시 수정 지시 → ③으로</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">3 / 41</div>
+</div>
+
+
+<!-- ==================== SLIDE 4: 예시① 지시 예시 ==================== -->
+<div class="slide">
+  <div class="slide-header">
+    <div class="slide-num">Section 0.3 — 실전 예시 ① 지시문</div>
+    <div class="slide-title">시니어의 구현 지시 — 실행 예시</div>
+  </div>
+  <div class="slide-summary">
+    명확한 지시 하나가 되돌리기 30분을 절약합니다 — <strong>What, How, Scope, Reference, Verify</strong>를 포함
+  </div>
+  <div class="slide-body">
+    <div class="body-left">
+      <div class="section-label">좋은 지시의 구성요소</div>
+      <div class="desc-block">
+        <h4><span class="tag tag-accent">What</span> 무엇을 할 것인가</h4>
+        <p>사용자 인증 API 구현</p>
+      </div>
+      <div class="desc-block">
+        <h4><span class="tag tag-teal">How</span> 기술 스택·방법</h4>
+        <p>NestJS + Passport.js + Prisma</p>
+      </div>
+      <div class="desc-block">
+        <h4><span class="tag tag-blue">Scope</span> 범위와 경계</h4>
+        <p>회원가입, 로그인 (소셜 로그인 제외)</p>
+      </div>
+      <div class="desc-block">
+        <h4><span class="tag tag-rose">Reference</span> 참고 자료</h4>
+        <p>설계 문서: docs/auth-design.md</p>
+      </div>
+      <div class="desc-block">
+        <h4><span class="tag tag-accent">Output</span> 결과물 저장</h4>
+        <p>./reports/auth-impl-report.md에 정리</p>
+      </div>
+    </div>
+    <div class="body-right">
+      <div class="section-label">실제 지시문 예시</div>
+      <div class="code-example"><span class="prompt">&gt;</span> 아래 설계에 따라 사용자 인증 API를 구현해줘.
+<span class="prompt">&gt;</span> <span class="comment">- 설계 문서:</span> <span class="highlight">docs/auth-design.md</span>
+<span class="prompt">&gt;</span> <span class="comment">- 스택:</span> <span class="keyword">NestJS + Passport.js + Prisma</span>
+<span class="prompt">&gt;</span> <span class="comment">- 범위:</span> 회원가입, 로그인 (소셜 로그인 제외)
+<span class="prompt">&gt;</span> <span class="comment">- 완료 후:</span> 구현 결과를
+<span class="prompt">&gt;</span>   <span class="highlight">./reports/auth-impl-report.md</span>에 정리</div>
+      <div style="margin-top:20px; padding:14px; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:8px;">
+        <div style="font-size: 13px; color:var(--text-muted); line-height:1.7;">
+          <span style="color:var(--emerald); font-weight:600;">✓</span> 스택이 지정되어 추측 없음<br>
+          <span style="color:var(--emerald); font-weight:600;">✓</span> 범위 경계가 명확 (소셜 로그인 제외)<br>
+          <span style="color:var(--emerald); font-weight:600;">✓</span> 참고 문서 경로 명시<br>
+          <span style="color:var(--emerald); font-weight:600;">✓</span> 결과물 저장 경로 지정
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">4 / 41</div>
+</div>
+
+
+<!-- ==================== SLIDE 5: 예시② 주니어 + AI(선임) ==================== -->
+<div class="slide">
+  <div class="slide-header">
+    <div class="slide-num">Section 0.4 — 실전 예시 ②</div>
+    <div class="slide-title">주니어 + AI Agent(선임 역할) 협업</div>
+  </div>
+  <div class="slide-summary">
+    선임이 없는 스타트업 — 주니어가 <strong>요구사항 구체화 → 설계 리뷰 → 코드 리뷰</strong>를 AI Agent와 수행하며 성장
+  </div>
+  <div class="slide-body">
+    <div class="body-left">
+      <div class="section-label">상황</div>
+      <div class="desc-block">
+        <p>주니어가 개발 총괄. 설계·기술 판단에 확신 부족. 물어볼 선임이 없어 혼자 결정 → 반복적으로 뒤엎는 구조.</p>
+      </div>
+      <div class="section-label">핵심 원칙</div>
+      <table class="mini-table">
+        <tr><th>원칙</th><th>설명</th></tr>
+        <tr><td>AI가 대신 안 한다</td><td>주니어가 직접 구현, AI는 리뷰·조언</td></tr>
+        <tr><td>결정은 사람이</td><td>선택지와 근거 제공, 판단은 주니어 몫</td></tr>
+        <tr><td>"왜?"를 질문</td><td>AI의 피드백을 이해하면 학습 가속</td></tr>
+        <tr><td>과정을 문서로</td><td>리뷰 결과 축적 = 팀 지식 자산</td></tr>
+      </table>
+      <div class="callout">
+        <strong>"대신 해주는 도구"가 아닌 "함께 성장하는 파트너"</strong><br>
+        설계·리뷰 피드백을 받으며 주니어 역량이 성장
+      </div>
+    </div>
+    <div class="body-right">
+      <div class="section-label">협업 흐름 (8단계)</div>
+      <div class="flow-v" style="gap:0;">
+        <div class="flow-box person" style="width:300px;">① 요구사항 초안 작성 <span class="sub">주니어가 아는 범위에서 정리</span></div>
+        <div class="flow-arrow"></div>
+        <div class="flow-box agent" style="width:300px;">② 요구사항 리뷰 <span class="sub">AI — 빠진 항목·모순 지적 + 질문</span></div>
+        <div class="flow-arrow"></div>
+        <div class="flow-box person" style="width:300px;">③ 답변 → 요구사항 확정 <span class="sub">주니어 — 질문에 답하며 항목 보완</span></div>
+        <div class="flow-arrow"></div>
+        <div class="flow-box agent" style="width:300px;">④ 설계 리뷰 + 대안 제시 <span class="sub">AI — 2~3가지 방안, 장단점 비교</span></div>
+        <div class="flow-arrow"></div>
+        <div class="flow-box person" style="width:300px;">⑤ 방향 결정 → 직접 구현 <span class="sub">주니어 — 근거를 이해하고 스스로 결정</span></div>
+        <div class="flow-arrow"></div>
+        <div class="flow-box agent" style="width:300px;">⑥ 코드 리뷰 + 피드백 <span class="sub">AI — 설계 대비 일치·보안·개선점</span></div>
+        <div class="flow-arrow"></div>
+        <div class="flow-box result" style="width:300px;">⑦⑧ 수정·학습 → 배포 판단 <span class="sub">역량 성장 사이클</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">5 / 41</div>
+</div>
+
+
+<!-- ==================== SLIDE 6: 도입 절차 개요 ==================== -->
+<div class="slide">
+  <div class="slide-header">
+    <div class="slide-num">Section 0.5</div>
+    <div class="slide-title">AI Agent 협업 도입 절차</div>
+  </div>
+  <div class="slide-summary">
+    개인·조직의 <strong>부족한 부분을 AI Agent로 채우고</strong>, 상호 피드백으로 검증하는 <strong>4단계 프로세스</strong>
+  </div>
+  <div class="slide-body">
+    <div class="body-left">
+      <div class="section-label">4단계 요약</div>
+      <div class="step-cards">
+        <div class="step-card">
+          <div class="num n1">1</div>
+          <div class="label">부족한 점을 진단한다 <span>→ AI Agent에게 부여할 역할 결정</span></div>
+        </div>
+        <div class="step-card">
+          <div class="num n2">2</div>
+          <div class="label">수행 방식을 정의한다 <span>→ 해당 역할의 업무 방식을 문서화</span></div>
+        </div>
+        <div class="step-card">
+          <div class="num n3">3</div>
+          <div class="label">소단위 업무에 적용하며 개선 <span>→ 적용 → 피드백 → 지침 개선 사이클</span></div>
+        </div>
+        <div class="step-card">
+          <div class="num n4">4</div>
+          <div class="label">효과 확인 후 범위 확대 <span>→ 업무 범위·적용 대상 점진 확장</span></div>
+        </div>
+      </div>
+      <div class="callout" style="margin-top:16px;">
+        <strong>핵심:</strong> "AI Agent에게 무엇을 시킬까"가 아니라<br>
+        <strong>"우리에게 무엇이 부족한가"에서 출발</strong>합니다.
+      </div>
+    </div>
+    <div class="body-right">
+      <div class="section-label">도입 프로세스 흐름</div>
+      <svg viewBox="0 0 480 480" xmlns="http://www.w3.org/2000/svg" style="width:100%; max-width:480px;">
+        <!-- Circular arrows -->
+        <defs>
+          <marker id="ah" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <path d="M0,0 L8,3 L0,6" fill="#64748B"/>
+          </marker>
+        </defs>
+        <!-- Curved path connecting steps -->
+        <path d="M240,60 Q400,60 400,180 Q400,300 240,340 Q80,340 80,220 Q80,100 200,65" fill="none" stroke="#334155" stroke-width="2" stroke-dasharray="6,4" marker-end="url(#ah)"/>
+
+        <!-- Step 1 -->
+        <rect x="160" y="20" width="160" height="64" rx="10" fill="rgba(59,130,246,0.12)" stroke="rgba(59,130,246,0.3)" stroke-width="1.5"/>
+        <text x="240" y="44" text-anchor="middle" fill="#60A5FA" font-size="12" font-weight="700" font-family="Pretendard,-apple-system,BlinkMacSystemFont,sans-serif">STEP 1</text>
+        <text x="240" y="64" text-anchor="middle" fill="#94A3B8" font-size="13" font-weight="600" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">부족한 점 진단</text>
+
+        <!-- Step 2 -->
+        <rect x="310" y="140" width="160" height="64" rx="10" fill="rgba(255,102,0,0.12)" stroke="rgba(255,102,0,0.3)" stroke-width="1.5"/>
+        <text x="390" y="164" text-anchor="middle" fill="#FF8833" font-size="12" font-weight="700" font-family="Pretendard,-apple-system,BlinkMacSystemFont,sans-serif">STEP 2</text>
+        <text x="390" y="184" text-anchor="middle" fill="#94A3B8" font-size="13" font-weight="600" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">수행 방식 정의</text>
+
+        <!-- Step 3 -->
+        <rect x="160" y="280" width="160" height="64" rx="10" fill="rgba(16,185,129,0.12)" stroke="rgba(16,185,129,0.3)" stroke-width="1.5"/>
+        <text x="240" y="304" text-anchor="middle" fill="#10B981" font-size="12" font-weight="700" font-family="Pretendard,-apple-system,BlinkMacSystemFont,sans-serif">STEP 3</text>
+        <text x="240" y="324" text-anchor="middle" fill="#94A3B8" font-size="13" font-weight="600" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">소단위 적용 · 개선</text>
+
+        <!-- Step 4 -->
+        <rect x="10" y="140" width="160" height="64" rx="10" fill="rgba(245,158,11,0.12)" stroke="rgba(245,158,11,0.3)" stroke-width="1.5"/>
+        <text x="90" y="164" text-anchor="middle" fill="#F59E0B" font-size="12" font-weight="700" font-family="Pretendard,-apple-system,BlinkMacSystemFont,sans-serif">STEP 4</text>
+        <text x="90" y="184" text-anchor="middle" fill="#94A3B8" font-size="13" font-weight="600" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">범위 확대</text>
+
+        <!-- Center label -->
+        <text x="240" y="192" text-anchor="middle" fill="#475569" font-size="13" font-weight="700" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">상호 피드백</text>
+        <text x="240" y="210" text-anchor="middle" fill="#475569" font-size="13" font-weight="700" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">검증 사이클</text>
+
+        <!-- Output labels -->
+        <text x="240" y="102" text-anchor="middle" fill="#64748B" font-size="11" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">→ 역할 결정</text>
+        <text x="390" y="222" text-anchor="middle" fill="#64748B" font-size="11" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">→ 지침 문서</text>
+        <text x="240" y="364" text-anchor="middle" fill="#64748B" font-size="11" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">→ 개선된 지침</text>
+        <text x="90" y="222" text-anchor="middle" fill="#64748B" font-size="11" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">→ 팀 공유 지침</text>
+
+        <!-- Scale bar at bottom -->
+        <rect x="40" y="410" width="95" height="40" rx="6" fill="rgba(59,130,246,0.1)"/>
+        <text x="87" y="428" text-anchor="middle" fill="#60A5FA" font-size="11" font-weight="600" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">API 1개</text>
+        <text x="87" y="442" text-anchor="middle" fill="#475569" font-size="10" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">1차 검증</text>
+
+        <rect x="145" y="410" width="95" height="40" rx="6" fill="rgba(13,148,136,0.1)"/>
+        <text x="192" y="428" text-anchor="middle" fill="#14B8A6" font-size="11" font-weight="600" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">모듈 단위</text>
+        <text x="192" y="442" text-anchor="middle" fill="#475569" font-size="10" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">일관성 확인</text>
+
+        <rect x="250" y="410" width="95" height="40" rx="6" fill="rgba(255,102,0,0.1)"/>
+        <text x="297" y="428" text-anchor="middle" fill="#FF8833" font-size="11" font-weight="600" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">기능 단위</text>
+        <text x="297" y="442" text-anchor="middle" fill="#475569" font-size="10" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">전체 흐름</text>
+
+        <rect x="355" y="410" width="95" height="40" rx="6" fill="rgba(16,185,129,0.1)"/>
+        <text x="402" y="428" text-anchor="middle" fill="#10B981" font-size="11" font-weight="600" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">팀 전체</text>
+        <text x="402" y="442" text-anchor="middle" fill="#475569" font-size="10" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">표준화</text>
+
+        <text x="240" y="470" text-anchor="middle" fill="#475569" font-size="11" font-weight="600" font-family="Pretendard,-apple-system,BlinkMacSystemFont,sans-serif">적용 범위 확대 →</text>
+      </svg>
+    </div>
+  </div>
+  <div class="slide-footer">6 / 41</div>
+</div>
+
+
+<!-- ==================== SLIDE 7: Step 1~2 상세 ==================== -->
+<div class="slide">
+  <div class="slide-header">
+    <div class="slide-num">Section 0.5 — Step 1 & 2 상세</div>
+    <div class="slide-title">진단 → 역할 정의 → 수행 방식 문서화</div>
+  </div>
+  <div class="slide-summary">
+    <strong>Step 1</strong>에서 병목을 파악하고, <strong>Step 2</strong>에서 AI Agent가 따를 구체적 업무 방식을 정의합니다
+  </div>
+  <div class="slide-body">
+    <div class="body-left">
+      <div class="section-label">Step 1. 부족한 점 진단</div>
+      <div class="compare-row">
+        <div class="compare-card" style="border-color:rgba(59,130,246,0.2); background:rgba(59,130,246,0.05);">
+          <h5 style="color:var(--blue-soft);">시니어 팀</h5>
+          <p>밀리는 업무: 구현·문서화·테스트<br>원인: 주니어 부재<br><span style="color:var(--blue-soft); font-weight:600;">→ AI = 주니어 역할</span></p>
+        </div>
+        <div class="compare-card" style="border-color:rgba(255,102,0,0.2); background:rgba(255,102,0,0.05);">
+          <h5 style="color:var(--accent-soft);">주니어 스타트업</h5>
+          <p>밀리는 업무: 설계 리뷰·코드 리뷰<br>원인: 선임 부재<br><span style="color:var(--accent-soft); font-weight:600;">→ AI = 선임 역할</span></p>
+        </div>
+      </div>
+
+      <div class="section-label" style="margin-top:16px;">Step 2. 수행 방식 정의</div>
+      <div class="desc-block">
+        <p>"주니어처럼 해줘"는 지시가 아닙니다. 해당 역할의 <strong>실제 업무 방식을 문서화</strong>해야 AI Agent가 의도대로 움직입니다.</p>
+      </div>
+      <div class="callout">
+        수행 방식이 명확할수록 AI Agent의 결과 품질이 올라갑니다.<br>
+        → 이 문서가 <strong>CLAUDE.md 또는 별도 지침 파일</strong>이 됩니다.
+      </div>
+    </div>
+    <div class="body-right">
+      <div class="section-label">수행 방식 정의 예시</div>
+      <div class="code-example" style="margin-bottom:16px;"><span class="comment">── 시니어가 "주니어 역할" 정의 ──</span>
+
+<span class="highlight">■ 코드 구현 시</span>
+  <span class="keyword">-</span> 설계 문서를 먼저 읽고,
+    설계에 없는 판단은 하지 말 것
+  <span class="keyword">-</span> 구현 완료 후 수행결과 보고서 작성
+  <span class="keyword">-</span> 보고서: 구현 범위, 변경 파일,
+    테스트 결과, 미해결 이슈
+
+<span class="highlight">■ 테스트 시</span>
+  <span class="keyword">-</span> Jest 단위 테스트, 커버리지 80%+
+  <span class="keyword">-</span> 기존 테스트 깨지면 즉시 보고</div>
+      <div class="code-example"><span class="comment">── 주니어가 "선임 역할" 정의 ──</span>
+
+<span class="highlight">■ 요구사항 리뷰 시</span>
+  <span class="keyword">-</span> 빠진 항목·모순을 질문 형태로 정리
+  <span class="keyword">-</span> "이렇게 해"가 아닌 "이건 고려했는가?"
+
+<span class="highlight">■ 코드 리뷰 시</span>
+  <span class="keyword">-</span> 설계 대비 일치 여부 확인
+  <span class="keyword">-</span> 개선점은 이유와 함께 제시 (학습)</div>
+    </div>
+  </div>
+  <div class="slide-footer">7 / 41</div>
+</div>
+
+
+<!-- ==================== SLIDE 8: 가이드 구성 안내 ==================== -->
+<div class="slide">
+  <div class="slide-header">
+    <div class="slide-num">Section 0.6</div>
+    <div class="slide-title">이 가이드의 전체 구성</div>
+  </div>
+  <div class="slide-summary">
+    기초편은 <strong>"설치하고 쓸 수 있게"</strong>, 심화편은 <strong>"제대로 쓰고 실수를 줄이게"</strong>
+  </div>
+  <div class="slide-body">
+    <div class="body-left">
+      <div class="section-label">커리큘럼 맵</div>
+      <table class="mini-table">
+        <tr><th>구분</th><th>장</th><th>내용</th></tr>
+        <tr><td style="color:var(--accent-soft);">개요</td><td>0장</td><td>AI Agent를 협업 대상으로 바라보는 관점</td></tr>
+        <tr><td style="color:var(--blue-soft);" rowspan="4">기초편</td><td>1장</td><td>Claude Code CLI 설치</td></tr>
+        <tr><td>2장</td><td>프로젝트 생성 · CLAUDE.md · Memory</td></tr>
+        <tr><td>3장</td><td>MCP 서버 (Serena, Sequential Thinking)</td></tr>
+        <tr><td>4장</td><td>Sub Agent 생성·활용</td></tr>
+        <tr><td style="color:var(--teal-soft);" rowspan="2">심화편</td><td>심화 1</td><td>AI Agent 사용상 주의점</td></tr>
+        <tr><td>심화 2</td><td>컨텍스트 관리와 토큰 최적화</td></tr>
+      </table>
+      <div class="callout" style="margin-top:12px;">
+        각 장은 독립적으로 참고 가능하며,<br>
+        순서대로 따라하면 AI Agent 활용 역량이 단계적으로 올라갑니다.
+      </div>
+    </div>
+    <div class="body-right">
+      <div class="section-label">학습 경로</div>
+      <svg viewBox="0 0 460 440" xmlns="http://www.w3.org/2000/svg" style="width:100%; max-width:460px;">
+        <!-- Phase labels -->
+        <text x="20" y="30" fill="#64748B" font-size="12" font-weight="700" font-family="Pretendard,-apple-system,BlinkMacSystemFont,sans-serif" letter-spacing="1">FOUNDATION</text>
+        <text x="20" y="210" fill="#64748B" font-size="12" font-weight="700" font-family="Pretendard,-apple-system,BlinkMacSystemFont,sans-serif" letter-spacing="1">PRACTICE</text>
+        <text x="20" y="345" fill="#64748B" font-size="12" font-weight="700" font-family="Pretendard,-apple-system,BlinkMacSystemFont,sans-serif" letter-spacing="1">MASTERY</text>
+
+        <!-- Foundation boxes -->
+        <rect x="20" y="42" width="200" height="44" rx="8" fill="rgba(255,102,0,0.12)" stroke="rgba(255,102,0,0.3)" stroke-width="1"/>
+        <text x="120" y="68" text-anchor="middle" fill="#FF8833" font-size="14" font-weight="600" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">0장. 개요 — 관점 정립</text>
+
+        <rect x="20" y="96" width="200" height="44" rx="8" fill="rgba(59,130,246,0.1)" stroke="rgba(59,130,246,0.25)" stroke-width="1"/>
+        <text x="120" y="122" text-anchor="middle" fill="#60A5FA" font-size="14" font-weight="600" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">1장. CLI 설치</text>
+
+        <rect x="240" y="42" width="200" height="44" rx="8" fill="rgba(59,130,246,0.1)" stroke="rgba(59,130,246,0.25)" stroke-width="1"/>
+        <text x="340" y="68" text-anchor="middle" fill="#60A5FA" font-size="14" font-weight="600" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">2장. 프로젝트 설정</text>
+
+        <rect x="240" y="96" width="200" height="44" rx="8" fill="rgba(59,130,246,0.1)" stroke="rgba(59,130,246,0.25)" stroke-width="1"/>
+        <text x="340" y="122" text-anchor="middle" fill="#60A5FA" font-size="14" font-weight="600" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">3장. MCP 서버</text>
+
+        <rect x="240" y="150" width="200" height="44" rx="8" fill="rgba(59,130,246,0.1)" stroke="rgba(59,130,246,0.25)" stroke-width="1"/>
+        <text x="340" y="176" text-anchor="middle" fill="#60A5FA" font-size="14" font-weight="600" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">4장. Sub Agent</text>
+
+        <!-- Arrow down -->
+        <line x1="230" y1="195" x2="230" y2="218" stroke="#475569" stroke-width="2" marker-end="url(#ah)"/>
+
+        <!-- Practice -->
+        <rect x="20" y="226" width="420" height="52" rx="8" fill="rgba(13,148,136,0.1)" stroke="rgba(13,148,136,0.25)" stroke-width="1"/>
+        <text x="230" y="248" text-anchor="middle" fill="#14B8A6" font-size="15" font-weight="700" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">심화 1장. AI Agent 사용상 주의점</text>
+        <text x="230" y="266" text-anchor="middle" fill="#64748B" font-size="12" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">명확한 지시 · 파일 저장 원칙 · 작업 시작/종료 절차</text>
+
+        <!-- Arrow down -->
+        <line x1="230" y1="280" x2="230" y2="348" stroke="#475569" stroke-width="2" marker-end="url(#ah)"/>
+
+        <!-- Mastery -->
+        <rect x="20" y="358" width="420" height="52" rx="8" fill="rgba(16,185,129,0.1)" stroke="rgba(16,185,129,0.25)" stroke-width="1"/>
+        <text x="230" y="380" text-anchor="middle" fill="#10B981" font-size="15" font-weight="700" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">심화 2장. 컨텍스트 관리와 토큰 최적화</text>
+        <text x="230" y="398" text-anchor="middle" fill="#64748B" font-size="12" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">판단 범위 축소 · 산출물 인덱스 · 참조 가이드 · 컨텍스트 격리</text>
+
+        <!-- Level indicator -->
+        <rect x="20" y="425" width="420" height="6" rx="3" fill="#1E293B"/>
+        <rect x="20" y="425" width="420" height="6" rx="3" fill="url(#levelGrad)"/>
+        <defs>
+          <linearGradient id="levelGrad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="rgba(59,130,246,0.4)"/>
+            <stop offset="50%" stop-color="rgba(13,148,136,0.4)"/>
+            <stop offset="100%" stop-color="rgba(16,185,129,0.5)"/>
+          </linearGradient>
+        </defs>
+        <text x="20" y="444" fill="#475569" font-size="10" font-family="Pretendard,-apple-system,BlinkMacSystemFont,sans-serif">입문</text>
+        <text x="440" y="444" text-anchor="end" fill="#475569" font-size="10" font-family="Pretendard,-apple-system,BlinkMacSystemFont,sans-serif">숙련</text>
+      </svg>
+    </div>
+  </div>
+  <div class="slide-footer">8 / 41</div>
+</div>
+
+<!-- ====== SLIDE 9: 기초편 섹션 구분자 ====== -->
+<div class="slide" style="justify-content:center;align-items:center;background:linear-gradient(160deg,var(--navy) 0%,#0F1724 60%,var(--navy) 100%)">
+  <div style="text-align:center;padding:60px">
+    <div style="font-size:12px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--text-dim);margin-bottom:16px;font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif">Section 2</div>
+    <div style="font-size:14px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:24px;font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif">AI Agent 사용자 교육 가이드</div>
+    <h1 style="font-size:53px;font-weight:800;line-height:1.2;letter-spacing:-1px;margin-bottom:20px">기초편</h1>
+    <div style="width:60px;height:3px;background:var(--accent);margin:0 auto 24px"></div>
+    <p style="font-size:20px;color:var(--text-muted);font-weight:400;line-height:1.6">
+      CLI 설치 · 프로젝트 설정 · MCP 서버 · Sub Agent
+    </p>
+  </div>
+  <div class="slide-footer">9 / 41</div>
+</div>
+
+<!-- ====== CH1-1: CLI 개요 + 설치 비교 ====== -->
+<div class="slide">
+  <div class="slide-header">
+    <div class="slide-num">Chapter 1 — Claude Code CLI 설치</div>
+    <div class="slide-title">CLI란? — 설치 방법 비교</div>
+  </div>
+  <div class="slide-summary">터미널에서 자연어로 AI에게 코딩을 시키는 명령줄 도구. <strong>웹 Claude.ai와 별도 프로그램</strong></div>
+  <div class="slide-body">
+    <div class="body-left">
+      <div class="section-label">설치 전 확인사항</div>
+      <table class="mini-table">
+        <tr><th>항목</th><th>조건</th></tr>
+        <tr><td>운영체제</td><td>Windows 10+, Ubuntu 20.04+, macOS 10.15+</td></tr>
+        <tr><td>계정</td><td>Claude Pro / Max / Teams / Enterprise</td></tr>
+        <tr><td>인터넷</td><td>설치·실행 시 필수</td></tr>
+        <tr><td>RAM / 디스크</td><td>4GB+ / 500MB+</td></tr>
+      </table>
+      <div class="section-label">설치 방법 비교</div>
+      <table class="mini-table">
+        <tr><th>방법</th><th>Node.js</th><th>자동 업데이트</th><th>비고</th></tr>
+        <tr><td>① 네이티브</td><td>불필요</td><td style="color:var(--emerald)">✅</td><td style="color:var(--accent-soft);font-weight:600">⭐ 공식 권장</td></tr>
+        <tr><td>② WinGet</td><td>불필요</td><td style="color:var(--rose)">❌ 수동</td><td>Windows 전용</td></tr>
+        <tr><td>③ npm</td><td>18+ 필요</td><td style="color:var(--rose)">❌ 수동</td><td style="color:var(--rose)">⛔ Deprecated</td></tr>
+      </table>
+    </div>
+    <div class="body-right">
+      <div class="section-label">네이티브 설치 (권장)</div>
+      <div class="code-example" style="margin-bottom:14px"><span class="comment"># ── Windows PowerShell ──</span>
+<span class="comment"># 사전: Git for Windows 필수</span>
+<span class="keyword">irm</span> https://claude.ai/install.ps1 | <span class="keyword">iex</span>
+
+<span class="comment"># ── Ubuntu Terminal ──</span>
+<span class="keyword">curl</span> -fsSL https://claude.ai/install.sh | <span class="keyword">bash</span>
+
+<span class="comment"># ── 확인 (터미널 재시작 후) ──</span>
+claude <span class="highlight">--version</span></div>
+      <div class="callout">
+        <strong>npm 설치는 지원 중단 예정</strong> — 신규 설치에 사용하지 마세요.<br>
+        기존 npm 사용자는 네이티브로 전환 권장
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">10 / 41</div>
+</div>
+
+
+<!-- ====== CH1-2: 인증 + 진단 + 명령어 ====== -->
+<div class="slide">
+  <div class="slide-header">
+    <div class="slide-num">Chapter 1 — Claude Code CLI 설치</div>
+    <div class="slide-title">최초 실행 · 인증 · 진단 · 관리</div>
+  </div>
+  <div class="slide-summary">설치 후 <strong>최초 인증 한 번</strong>이면 이후 재인증 불필요. 문제 발생 시 <strong>claude doctor</strong>로 진단</div>
+  <div class="slide-body">
+    <div class="body-left">
+      <div class="section-label">최초 실행 및 인증</div>
+      <div class="desc-block">
+        <p>프로젝트 폴더에서 <code style="color:var(--accent-soft)">claude</code> 실행 → 브라우저 자동 열림 → Claude.ai 계정 로그인 → 터미널에 자동 반영</p>
+      </div>
+      <div class="code-example" style="margin-bottom:16px"><span class="keyword">cd</span> ~/my-project
+<span class="keyword">claude</span>             <span class="comment"># 브라우저 인증 자동 진행</span>
+
+<span class="comment"># 브라우저 없는 환경 (서버 등)</span>
+<span class="keyword">export</span> ANTHROPIC_API_KEY=<span class="highlight">sk-ant-xxxxx</span></div>
+      <div class="section-label">주요 관리 명령어</div>
+      <table class="mini-table">
+        <tr><th>명령</th><th>용도</th></tr>
+        <tr><td><code>claude doctor</code></td><td>설치 상태 진단</td></tr>
+        <tr><td><code>claude --version</code></td><td>버전 확인</td></tr>
+        <tr><td><code>claude uninstall</code></td><td>삭제 (네이티브)</td></tr>
+      </table>
+    </div>
+    <div class="body-right">
+      <div class="section-label">트러블슈팅</div>
+      <div class="code-example" style="margin-bottom:14px"><span class="comment"># "claude를 인식할 수 없습니다" 오류 시</span>
+
+<span class="comment"># ── Windows ──</span>
+[Environment]::SetEnvironmentVariable(
+  "PATH",
+  "$env:PATH;$env:USERPROFILE\.local\bin",
+  [EnvironmentVariableTarget]::User)
+<span class="comment"># → PowerShell 재시작</span>
+
+<span class="comment"># ── Ubuntu ──</span>
+<span class="keyword">echo</span> 'export PATH="$HOME/.local/bin:$PATH"'\
+  >> ~/.bashrc
+<span class="keyword">source</span> ~/.bashrc</div>
+      <div class="code-example"><span class="comment"># npm → 네이티브 전환</span>
+<span class="comment"># ── Windows ──</span>
+<span class="keyword">irm</span> https://claude.ai/install.ps1 | <span class="keyword">iex</span>
+npm uninstall -g @anthropic-ai/claude-code
+
+<span class="comment"># ── Ubuntu ──</span>
+<span class="keyword">curl</span> -fsSL https://claude.ai/install.sh | bash
+npm uninstall -g @anthropic-ai/claude-code
+<span class="comment"># 설정(~/.claude/)은 보존됩니다</span></div>
+    </div>
+  </div>
+  <div class="slide-footer">11 / 41</div>
+</div>
+
+
+<!-- ====== CH2-1: 프로젝트 초기화 + CLAUDE.md ====== -->
+<div class="slide">
+  <div class="slide-header">
+    <div class="slide-num">Chapter 2 — 프로젝트 생성 및 설정</div>
+    <div class="slide-title">프로젝트 초기화와 CLAUDE.md</div>
+  </div>
+  <div class="slide-summary"><strong>/init</strong> 한 번으로 프로젝트 분석 → CLAUDE.md 자동 생성. 매 세션마다 이 맥락을 자동 로드</div>
+  <div class="slide-body">
+    <div class="body-left">
+      <div class="section-label">프로젝트 초기화 절차</div>
+      <div class="flow-v" style="gap:0;align-items:stretch;margin-bottom:16px">
+        <div class="flow-box neutral" style="text-align:left;width:100%">① 프로젝트 폴더 생성 + <code style="color:var(--accent-soft)">git init</code> <span class="sub">Git 저장소 루트 = 프로젝트 경계</span></div>
+        <div class="flow-arrow" style="align-self:center"></div>
+        <div class="flow-box agent" style="width:100%">② <code>claude</code> 실행 → <code>/init</code> 입력 <span class="sub">디렉토리 스캔 + 설정 파일 분석</span></div>
+        <div class="flow-arrow" style="align-self:center"></div>
+        <div class="flow-box result" style="width:100%">③ CLAUDE.md 자동 생성 <span class="sub">기술 스택·빌드 명령·컨벤션 감지 결과</span></div>
+      </div>
+      <div class="section-label">CLAUDE.md에 포함할 것 / 넣지 말 것</div>
+      <div class="compare-row">
+        <div class="compare-card" style="border-color:rgba(16,185,129,0.25)">
+          <h5 style="color:var(--emerald)">✅ 포함</h5>
+          <p>프로젝트 개요, 기술 스택, 빌드/테스트 명령, 핵심 디렉토리, 주의사항</p>
+        </div>
+        <div class="compare-card" style="border-color:rgba(244,63,94,0.25)">
+          <h5 style="color:#FB7185">❌ 제외</h5>
+          <p>린터가 처리하는 규칙, 전체 파일 목록, 일반적 개발 상식</p>
+        </div>
+      </div>
+    </div>
+    <div class="body-right">
+      <div class="section-label">CLAUDE.md 작성 예시</div>
+      <div class="code-example"><span class="highlight"># My Project</span>
+
+<span class="keyword">## Tech Stack</span>
+- NestJS 11 + React 18 + TypeScript
+- PostgreSQL + Prisma ORM
+- Jest for testing
+
+<span class="keyword">## Commands</span>
+| Command        | Purpose      |
+|----------------|--------------|
+| npm run dev    | 개발 서버 실행 |
+| npm run build  | 프로덕션 빌드  |
+| npm test       | 전체 테스트    |
+
+<span class="keyword">## Architecture</span>
+- src/api/        — API 라우트
+- src/components/ — React 컴포넌트
+- src/services/   — 비즈니스 로직
+
+<span class="keyword">## Rules</span>
+- TypeScript strict mode
+- 커밋 전 반드시 npm test 통과
+- main 브랜치 직접 커밋 금지</div>
+      <div class="callout" style="margin-top:12px"><strong>핵심 원칙:</strong> CLAUDE.md는 200줄 이하로. 길어지면 지시 준수율 하락</div>
+    </div>
+  </div>
+  <div class="slide-footer">12 / 41</div>
+</div>
+
+
+<!-- ====== CH2-2: CLAUDE.md 계층구조 ====== -->
+<div class="slide">
+  <div class="slide-header">
+    <div class="slide-num">Chapter 2 — 프로젝트 생성 및 설정</div>
+    <div class="slide-title">CLAUDE.md 계층 구조</div>
+  </div>
+  <div class="slide-summary">여러 위치에 배치 가능 — <strong>구체적인 것이 우선</strong>. 글로벌(개인) → 프로젝트(팀) → 로컬(개인) → 하위 디렉토리</div>
+  <div class="slide-body">
+    <div class="body-left">
+      <div class="section-label">4단계 계층</div>
+      <div class="limit-card" style="background:var(--accent-glow);border-color:var(--border-accent)">
+        <div class="num" style="color:var(--accent-soft)">①</div>
+        <div class="title" style="color:var(--accent-soft)">글로벌 — ~/.claude/CLAUDE.md</div>
+        <div class="desc">모든 프로젝트에 적용되는 개인 선호</div>
+      </div>
+      <div class="limit-card" style="background:rgba(59,130,246,0.06);border-color:rgba(59,130,246,0.2)">
+        <div class="num" style="color:var(--blue-soft)">②</div>
+        <div class="title" style="color:var(--blue-soft)">프로젝트 — ./CLAUDE.md</div>
+        <div class="desc">Git에 커밋, 팀 전체 공유</div>
+      </div>
+      <div class="limit-card" style="background:rgba(16,185,129,0.06);border-color:rgba(16,185,129,0.2)">
+        <div class="num" style="color:var(--emerald)">③</div>
+        <div class="title" style="color:var(--emerald)">프로젝트 로컬 — ./CLAUDE.local.md</div>
+        <div class="desc">개인용, Git 커밋하지 않음</div>
+      </div>
+      <div class="limit-card" style="background:rgba(167,139,250,0.06);border-color:rgba(167,139,250,0.2)">
+        <div class="num" style="color:var(--purple-soft)">④</div>
+        <div class="title" style="color:var(--purple-soft)">하위 디렉토리 — ./frontend/CLAUDE.md</div>
+        <div class="desc">해당 폴더 작업 시에만 온디맨드 로드</div>
+      </div>
+      <div class="callout" style="margin-top:12px"><strong>우선순위:</strong> 구체적 > 일반. 동일 지시 충돌 시 더 구체적 레벨 적용</div>
+    </div>
+    <div class="body-right">
+      <div class="section-label">실전 활용 예시</div>
+      <div class="code-example" style="margin-bottom:16px"><span class="comment"># ── 글로벌 (개인 선호) ──</span>
+<span class="highlight">~/.claude/CLAUDE.md</span>
+  "응답은 한국어로"
+  "커밋 메시지는 Conventional Commits"
+
+<span class="comment"># ── 프로젝트 (팀 공유) ──</span>
+<span class="highlight">~/projects/my-app/CLAUDE.md</span>
+  프로젝트 스택, 빌드 명령, 아키텍처
+
+<span class="comment"># ── 로컬 (나만) ──</span>
+<span class="highlight">~/projects/my-app/CLAUDE.local.md</span>
+  "나는 백엔드 담당, 프론트 수정 시 확인"
+
+<span class="comment"># ── 하위 디렉토리 ──</span>
+<span class="highlight">~/projects/my-app/frontend/CLAUDE.md</span>
+  "React Query 사용, Tailwind 규칙"</div>
+      <div class="section-label">길어질 경우 조치</div>
+      <table class="mini-table">
+        <tr><th>방법</th><th>설명</th></tr>
+        <tr><td>불필요 지시 정리</td><td>당연한 것 삭제 (린터가 처리하는 규칙 등)</td></tr>
+        <tr><td>하위 디렉토리 분리</td><td>모노레포 → 폴더별 CLAUDE.md</td></tr>
+        <tr><td>@import 참조</td><td>기존 문서 참조로 본문 축소</td></tr>
+        <tr><td>린터/훅 이관</td><td>반복 규칙은 도구로 강제</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="slide-footer">13 / 41</div>
+</div>
+
+
+<!-- ====== CH2-3: Memory vs CLAUDE.md ====== -->
+<div class="slide">
+  <div class="slide-header">
+    <div class="slide-num">Chapter 2 — 프로젝트 생성 및 설정</div>
+    <div class="slide-title">Memory (Claude.ai) vs CLAUDE.md (Claude Code)</div>
+  </div>
+  <div class="slide-summary">이름은 비슷하지만 <strong>완전히 다른 시스템</strong> — 동작 환경, 적용 단위, 저장 위치, 공유 방식 모두 다름</div>
+  <div class="slide-body">
+    <div class="body-left">
+      <div class="section-label">핵심 비교</div>
+      <table class="mini-table">
+        <tr><th>구분</th><th style="color:var(--blue-soft)">Memory</th><th style="color:var(--accent-soft)">CLAUDE.md</th></tr>
+        <tr><td>동작 환경</td><td>Claude.ai 웹/앱</td><td>Claude Code CLI</td></tr>
+        <tr><td>적용 단위</td><td>사람 (모든 대화)</td><td>프로젝트 (해당 리포)</td></tr>
+        <tr><td>저장 위치</td><td>Anthropic 서버</td><td>로컬 파일</td></tr>
+        <tr><td>편집 방법</td><td>"이거 기억해줘"</td><td>마크다운 직접 편집</td></tr>
+        <tr><td>버전 관리</td><td style="color:var(--rose)">❌</td><td style="color:var(--emerald)">✅ Git 커밋</td></tr>
+        <tr><td>팀 공유</td><td style="color:var(--rose)">❌ 개인 전용</td><td style="color:var(--emerald)">✅ Git으로</td></tr>
+      </table>
+    </div>
+    <div class="body-right">
+      <div class="section-label">설정 위치 요약</div>
+      <svg viewBox="0 0 460 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:460px">
+        <text x="230" y="24" text-anchor="middle" fill="#64748B" font-size="12" font-weight="700" font-family="Pretendard,-apple-system,BlinkMacSystemFont,sans-serif" letter-spacing="1">개인 설정</text>
+        <rect x="20" y="36" width="200" height="52" rx="8" fill="rgba(59,130,246,0.1)" stroke="rgba(59,130,246,0.25)"/>
+        <text x="120" y="58" text-anchor="middle" fill="#60A5FA" font-size="12" font-weight="600" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">Memory (Claude.ai)</text>
+        <text x="120" y="76" text-anchor="middle" fill="#64748B" font-size="11" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">Settings > Memory</text>
+        <rect x="240" y="36" width="200" height="52" rx="8" fill="rgba(255,102,0,0.1)" stroke="rgba(255,102,0,0.25)"/>
+        <text x="340" y="58" text-anchor="middle" fill="#FF8833" font-size="12" font-weight="600" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">글로벌 CLAUDE.md</text>
+        <text x="340" y="76" text-anchor="middle" fill="#64748B" font-size="11" font-family="Pretendard,-apple-system,BlinkMacSystemFont,sans-serif">~/.claude/CLAUDE.md</text>
+
+        <text x="230" y="120" text-anchor="middle" fill="#64748B" font-size="12" font-weight="700" font-family="Pretendard,-apple-system,BlinkMacSystemFont,sans-serif" letter-spacing="1">프로젝트 설정</text>
+        <rect x="20" y="134" width="200" height="52" rx="8" fill="rgba(59,130,246,0.1)" stroke="rgba(59,130,246,0.25)"/>
+        <text x="120" y="156" text-anchor="middle" fill="#60A5FA" font-size="12" font-weight="600" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">프로젝트 CLAUDE.md</text>
+        <text x="120" y="174" text-anchor="middle" fill="#64748B" font-size="11" font-family="Pretendard,-apple-system,BlinkMacSystemFont,sans-serif">./CLAUDE.md (팀 공유)</text>
+        <rect x="240" y="134" width="200" height="52" rx="8" fill="rgba(16,185,129,0.1)" stroke="rgba(16,185,129,0.25)"/>
+        <text x="340" y="156" text-anchor="middle" fill="#10B981" font-size="12" font-weight="600" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">로컬 CLAUDE.md</text>
+        <text x="340" y="174" text-anchor="middle" fill="#64748B" font-size="11" font-family="Pretendard,-apple-system,BlinkMacSystemFont,sans-serif">./CLAUDE.local.md</text>
+
+        <rect x="70" y="220" width="320" height="50" rx="8" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.1)"/>
+        <text x="230" y="240" text-anchor="middle" fill="var(--text)" font-size="13" font-weight="600" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">Memory = "나"에 대한 설정 (작업 스타일, 언어)</text>
+        <text x="230" y="258" text-anchor="middle" fill="var(--text)" font-size="13" font-weight="600" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">CLAUDE.md = "프로젝트"에 대한 설정 (스택, 규칙)</text>
+
+        <text x="230" y="310" text-anchor="middle" fill="#475569" font-size="12" font-weight="600" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">💡 세션 내 # 키를 누르면 CLAUDE.md에 즉시 추가 가능</text>
+      </svg>
+    </div>
+  </div>
+  <div class="slide-footer">14 / 41</div>
+</div>
+
+
+<!-- ====== CH3-1: MCP 개요 ====== -->
+<div class="slide">
+  <div class="slide-header">
+    <div class="slide-num">Chapter 3 — MCP 서버</div>
+    <div class="slide-title">MCP란? — 외부 도구 연결 프로토콜</div>
+  </div>
+  <div class="slide-summary"><strong>Model Context Protocol</strong> — Claude Code가 GitHub, DB, 브라우저 등 외부 시스템에 연결하는 개방형 표준</div>
+  <div class="slide-body">
+    <div class="body-left">
+      <div class="section-label">MCP의 역할</div>
+      <div class="desc-block">
+        <p>기본 Claude Code는 파일 읽기/쓰기, Bash 실행 정도만 가능합니다. MCP 서버를 연결하면 기능이 확장됩니다.</p>
+      </div>
+      <div class="section-label">기본 명령어</div>
+      <div class="code-example"><span class="comment"># 서버 관리</span>
+claude mcp <span class="keyword">add</span> &lt;이름&gt; -- &lt;명령&gt;
+claude mcp <span class="keyword">list</span>
+claude mcp <span class="keyword">remove</span> &lt;이름&gt;
+<span class="prompt">&gt;</span> <span class="keyword">/mcp</span>  <span class="comment"># 세션 내 상태 확인</span>
+
+<span class="comment"># 설정 범위 (scope)</span>
+<span class="keyword">--scope local</span>   <span class="comment"># 나만 (기본)</span>
+<span class="keyword">--scope project</span> <span class="comment"># 팀 공유 (.mcp.json)</span>
+<span class="keyword">--scope user</span>    <span class="comment"># 내 모든 프로젝트</span></div>
+    </div>
+    <div class="body-right">
+      <div class="section-label">MCP 연결 구조</div>
+      <svg viewBox="0 0 440 360" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:440px">
+        <rect x="130" y="20" width="180" height="56" rx="10" fill="rgba(59,130,246,0.12)" stroke="rgba(59,130,246,0.3)"/>
+        <text x="220" y="45" text-anchor="middle" fill="#60A5FA" font-size="14" font-weight="700" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">Claude Code</text>
+        <text x="220" y="63" text-anchor="middle" fill="#64748B" font-size="11" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">클라이언트</text>
+
+        <line x1="220" y1="76" x2="220" y2="110" stroke="#475569" stroke-width="2" stroke-dasharray="4,3"/>
+        <text x="220" y="100" text-anchor="middle" fill="#475569" font-size="10" font-family="Pretendard,-apple-system,BlinkMacSystemFont,sans-serif">MCP 프로토콜</text>
+
+        <rect x="20" y="120" width="130" height="50" rx="8" fill="rgba(255,102,0,0.1)" stroke="rgba(255,102,0,0.25)"/>
+        <text x="85" y="142" text-anchor="middle" fill="#FF8833" font-size="12" font-weight="600" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">Serena</text>
+        <text x="85" y="158" text-anchor="middle" fill="#64748B" font-size="10" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">코드 인덱싱</text>
+
+        <rect x="160" y="120" width="130" height="50" rx="8" fill="rgba(13,148,136,0.1)" stroke="rgba(13,148,136,0.25)"/>
+        <text x="225" y="142" text-anchor="middle" fill="#14B8A6" font-size="12" font-weight="600" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">Seq. Thinking</text>
+        <text x="225" y="158" text-anchor="middle" fill="#64748B" font-size="10" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">구조화된 사고</text>
+
+        <rect x="300" y="120" width="130" height="50" rx="8" fill="rgba(167,139,250,0.1)" stroke="rgba(167,139,250,0.25)"/>
+        <text x="365" y="142" text-anchor="middle" fill="#C4B5FD" font-size="12" font-weight="600" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">GitHub 등</text>
+        <text x="365" y="158" text-anchor="middle" fill="#64748B" font-size="10" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">외부 서비스</text>
+
+        <line x1="220" y1="76" x2="85" y2="120" stroke="#475569" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <line x1="220" y1="76" x2="365" y2="120" stroke="#475569" stroke-width="1.5" stroke-dasharray="4,3"/>
+
+        <!-- Scope boxes -->
+        <text x="220" y="210" text-anchor="middle" fill="#64748B" font-size="12" font-weight="700" font-family="Pretendard,-apple-system,BlinkMacSystemFont,sans-serif" letter-spacing="1">설정 파일 위치</text>
+        <rect x="20" y="225" width="130" height="44" rx="6" fill="rgba(255,102,0,0.08)" stroke="rgba(255,102,0,0.2)"/>
+        <text x="85" y="244" text-anchor="middle" fill="#FF8833" font-size="11" font-weight="600" font-family="Pretendard,-apple-system,BlinkMacSystemFont,sans-serif">~/.claude.json</text>
+        <text x="85" y="260" text-anchor="middle" fill="#64748B" font-size="10" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">개인 전역</text>
+
+        <rect x="160" y="225" width="130" height="44" rx="6" fill="rgba(59,130,246,0.08)" stroke="rgba(59,130,246,0.2)"/>
+        <text x="225" y="244" text-anchor="middle" fill="#60A5FA" font-size="11" font-weight="600" font-family="Pretendard,-apple-system,BlinkMacSystemFont,sans-serif">.mcp.json</text>
+        <text x="225" y="260" text-anchor="middle" fill="#64748B" font-size="10" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">팀 공유 (Git)</text>
+
+        <rect x="300" y="225" width="130" height="44" rx="6" fill="rgba(16,185,129,0.08)" stroke="rgba(16,185,129,0.2)"/>
+        <text x="365" y="244" text-anchor="middle" fill="#10B981" font-size="11" font-weight="600" font-family="Pretendard,-apple-system,BlinkMacSystemFont,sans-serif">settings.json</text>
+        <text x="365" y="260" text-anchor="middle" fill="#64748B" font-size="10" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">프로젝트 로컬</text>
+
+        <text x="220" y="305" text-anchor="middle" fill="#F59E0B" font-size="12" font-weight="600" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">⚠️ Windows에서 npx 사용 시 cmd /c 래퍼 필수</text>
+      </svg>
+    </div>
+  </div>
+  <div class="slide-footer">15 / 41</div>
+</div>
+
+
+<!-- ====== CH3-2: Serena + Sequential Thinking ====== -->
+<div class="slide">
+  <div class="slide-header">
+    <div class="slide-num">Chapter 3 — MCP 서버</div>
+    <div class="slide-title">유용한 MCP — Serena · Sequential Thinking</div>
+  </div>
+  <div class="slide-summary"><strong>Serena</strong>: 심볼 수준 코드 인덱싱 (토큰 70~80% 절감) | <strong>Sequential Thinking</strong>: 구조화된 단계별 사고</div>
+  <div class="slide-body">
+    <div class="body-left">
+      <div class="section-label">① Serena — 심볼 수준 코드 인덱싱</div>
+      <div class="desc-block">
+        <p>파일 전체 대신 심볼(함수, 클래스) 단위로 조회. 대규모 프로젝트에서 토큰을 크게 절약합니다.</p>
+      </div>
+      <table class="mini-table">
+        <tr><th>항목</th><th>기본 Claude Code</th><th>Serena 사용</th></tr>
+        <tr><td>코드 탐색</td><td>파일 전체 읽기</td><td>심볼 단위 조회</td></tr>
+        <tr><td>조회 속도</td><td>~45초 (grep)</td><td>~100ms (인덱스)</td></tr>
+        <tr><td>토큰 절감</td><td>—</td><td style="color:var(--emerald);font-weight:600">약 70~80%</td></tr>
+      </table>
+      <div style="margin-top:12px"></div>
+      <div class="section-label">② Sequential Thinking</div>
+      <div class="desc-block">
+        <p>복잡한 문제를 단계별로 분해. 아키텍처 설계, 디버깅 전략, 리팩토링 계획 시 유용.</p>
+      </div>
+    </div>
+    <div class="body-right">
+      <div class="section-label">설치 명령어</div>
+      <div class="code-example" style="margin-bottom:14px"><span class="comment"># ── Serena 설치 ──</span>
+<span class="comment"># 사전: uv 설치 필요</span>
+<span class="keyword">curl</span> -LsSf https://astral.sh/uv/install.sh\
+  | sh  <span class="comment"># Ubuntu</span>
+
+claude mcp add <span class="highlight">serena</span> -- \
+  uvx --from \
+  git+https://github.com/oraios/serena \
+  serena start-mcp-server \
+  --context ide-assistant \
+  --project $(pwd)
+
+<span class="comment"># 초기 온보딩</span>
+<span class="prompt">&gt;</span> Serena 온보딩을 시작해줘</div>
+      <div class="code-example"><span class="comment"># ── Sequential Thinking 설치 ──</span>
+<span class="comment"># Ubuntu/macOS</span>
+claude mcp add <span class="highlight">sequential-thinking</span> -- \
+  npx -y @modelcontextprotocol/\
+server-sequential-thinking
+
+<span class="comment"># Windows (cmd /c 래퍼 필수)</span>
+claude mcp add sequential-thinking -- \
+  <span class="keyword">cmd /c</span> npx -y @modelcontextprotocol/\
+server-sequential-thinking</div>
+    </div>
+  </div>
+  <div class="slide-footer">16 / 41</div>
+</div>
+
+
+<!-- ====== CH3-3: MCP 주의사항 + 컨텍스트 관리 ====== -->
+<div class="slide">
+  <div class="slide-header">
+    <div class="slide-num">Chapter 3 — MCP 서버</div>
+    <div class="slide-title">MCP 과다 설치 문제 · 컨텍스트 관리</div>
+  </div>
+  <div class="slide-summary">동시 활성화는 <strong>3~5개 이내</strong> 권장. 사용하지 않는 서버는 <strong>disabled: true</strong>로 비활성화</div>
+  <div class="slide-body">
+    <div class="body-left">
+      <div class="section-label">과다 설치 시 문제점</div>
+      <table class="mini-table">
+        <tr><th>문제</th><th>설명</th></tr>
+        <tr><td>컨텍스트 소모</td><td>도구 설명만으로 윈도우 차지</td></tr>
+        <tr><td>도구 이름 충돌</td><td>서로 다른 서버의 동일 이름 도구</td></tr>
+        <tr><td>세션 시작 지연</td><td>모든 서버 초기화 대기</td></tr>
+        <tr><td>선택 정확도 하락</td><td>도구가 많으면 적절한 선택 어려움</td></tr>
+      </table>
+      <div class="section-label" style="margin-top:16px">해결: 용도별 비활성화</div>
+      <div class="code-example"><span class="comment"># ~/.claude.json</span>
+{
+  "mcpServers": {
+    "serena": {
+      "disabled": <span class="success">false</span>  <span class="comment"># 활성</span>
+    },
+    "sequential-thinking": {
+      "disabled": <span class="highlight">true</span>   <span class="comment"># 비활성</span>
+    }
+  }
+}</div>
+    </div>
+    <div class="body-right">
+      <div class="section-label">컨텍스트 관리 명령어</div>
+      <table class="mini-table">
+        <tr><th>명령</th><th>용도</th></tr>
+        <tr><td style="color:var(--teal-soft);font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif">/context</td><td>토큰 사용량 카테고리별 표시</td></tr>
+        <tr><td style="color:var(--teal-soft);font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif">/compact</td><td>대화 내역 요약·압축, 공간 확보</td></tr>
+        <tr><td style="color:var(--teal-soft);font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif">/compact &lt;지시&gt;</td><td>지정 내용 보존하면서 압축</td></tr>
+        <tr><td style="color:var(--teal-soft);font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif">/clear</td><td>컨텍스트 완전 초기화</td></tr>
+        <tr><td style="color:var(--teal-soft);font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif">/cost</td><td>세션 토큰 비용 확인</td></tr>
+      </table>
+      <div class="code-example" style="margin-top:14px"><span class="prompt">&gt;</span> <span class="keyword">/context</span>
+
+<span class="comment">Context Usage</span>
+<span class="comment">claude-opus-4-6 • 51k/200k (26%)</span>
+
+  System prompt:   2.6k  (1.3%)
+  System tools:   17.6k  (8.8%)
+  <span class="highlight">MCP tools:        907  (0.5%)</span>
+  Messages:       30.5k (15.3%)
+  <span class="success">Free space:      114k (57.0%)</span></div>
+      <div class="callout" style="margin-top:10px"><strong>자동 압축:</strong> 사용량 ~83.5%에서 자동 실행. 수동 /compact로 보존 내용 직접 제어 가능</div>
+    </div>
+  </div>
+  <div class="slide-footer">17 / 41</div>
+</div>
+
+
+<!-- ====== CH4-1: Sub Agent 개요 ====== -->
+<div class="slide">
+  <div class="slide-header">
+    <div class="slide-num">Chapter 4 — Sub Agent</div>
+    <div class="slide-title">Sub Agent란? — 전문화된 AI 팀원</div>
+  </div>
+  <div class="slide-summary">메인 Claude Code = 총괄 매니저. Sub Agent = 전문 분야를 가진 팀원. <strong>독립된 컨텍스트</strong>에서 동작</div>
+  <div class="slide-body">
+    <div class="body-left">
+      <div class="section-label">왜 Sub Agent를 사용하는가?</div>
+      <table class="mini-table">
+        <tr><th>목적</th><th>설명</th></tr>
+        <tr><td>컨텍스트 보존</td><td>탐색·분석이 메인 대화를 오염시키지 않음</td></tr>
+        <tr><td>전문화</td><td>역할별 시스템 프롬프트로 정확도 향상</td></tr>
+        <tr><td>도구 제한</td><td>리뷰 에이전트는 Read만, 구현 에이전트는 Write 허용</td></tr>
+        <tr><td>재사용</td><td>한 번 만들면 모든 프로젝트에서 활용</td></tr>
+      </table>
+      <div class="section-label" style="margin-top:16px">기본 내장 Sub Agent</div>
+      <table class="mini-table">
+        <tr><th>이름</th><th>도구</th><th>역할</th></tr>
+        <tr><td>Explore</td><td>Read 전용</td><td>코드베이스 검색·탐색</td></tr>
+        <tr><td>Plan</td><td>Read 전용</td><td>Plan Mode에서 분석</td></tr>
+        <tr><td>General</td><td>전체</td><td>복잡한 다단계 작업</td></tr>
+        <tr><td>Bash</td><td>터미널</td><td>별도 컨텍스트에서 명령 실행</td></tr>
+      </table>
+    </div>
+    <div class="body-right">
+      <div class="section-label">Sub Agent 동작 구조</div>
+      <svg viewBox="0 0 440 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:440px">
+        <rect x="80" y="20" width="280" height="60" rx="10" fill="rgba(59,130,246,0.12)" stroke="rgba(59,130,246,0.3)"/>
+        <text x="220" y="45" text-anchor="middle" fill="#60A5FA" font-size="14" font-weight="700" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">메인 Claude Code 세션 (총괄)</text>
+        <text x="220" y="65" text-anchor="middle" fill="#64748B" font-size="11" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">"이 코드를 리뷰해줘"</text>
+
+        <line x1="220" y1="80" x2="220" y2="110" stroke="#475569" stroke-width="2"/>
+        <text x="250" y="100" fill="#475569" font-size="11" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">위임</text>
+
+        <rect x="60" y="115" width="320" height="120" rx="10" fill="rgba(255,102,0,0.08)" stroke="rgba(255,102,0,0.25)" stroke-dasharray="6,3"/>
+        <text x="220" y="140" text-anchor="middle" fill="#FF8833" font-size="13" font-weight="700" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">Sub Agent: code-reviewer</text>
+        <text x="220" y="162" text-anchor="middle" fill="#94A3B8" font-size="12" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">독립 컨텍스트 윈도우</text>
+        <text x="220" y="182" text-anchor="middle" fill="#94A3B8" font-size="12" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">Read 전용 도구만 허용</text>
+        <text x="220" y="202" text-anchor="middle" fill="#94A3B8" font-size="12" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">코드 리뷰 전용 시스템 프롬프트</text>
+
+        <line x1="220" y1="235" x2="220" y2="265" stroke="#475569" stroke-width="2"/>
+        <text x="260" y="255" fill="#475569" font-size="11" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">결과 반환</text>
+
+        <rect x="80" y="270" width="280" height="50" rx="10" fill="rgba(16,185,129,0.12)" stroke="rgba(16,185,129,0.3)"/>
+        <text x="220" y="293" text-anchor="middle" fill="#10B981" font-size="13" font-weight="600" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">"리뷰 결과: 3건의 개선 사항 발견"</text>
+        <text x="220" y="310" text-anchor="middle" fill="#64748B" font-size="11" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">요약만 메인에 전달 → 컨텍스트 보존</text>
+
+        <text x="220" y="360" text-anchor="middle" fill="#475569" font-size="12" font-weight="600" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">💡 내장 에이전트는 자동 위임 — 사용자 호출 불필요</text>
+      </svg>
+    </div>
+  </div>
+  <div class="slide-footer">18 / 41</div>
+</div>
+
+
+<!-- ====== CH4-2: Sub Agent 생성 ====== -->
+<div class="slide">
+  <div class="slide-header">
+    <div class="slide-num">Chapter 4 — Sub Agent</div>
+    <div class="slide-title">Sub Agent 생성 및 파일 구조</div>
+  </div>
+  <div class="slide-summary"><strong>/agents</strong> 명령으로 인터랙티브 생성 또는 마크다운 파일 직접 작성. <strong>YAML 프론트매터 + 프롬프트</strong></div>
+  <div class="slide-body">
+    <div class="body-left">
+      <div class="section-label">생성 방법</div>
+      <div class="desc-block">
+        <h4><span class="tag tag-accent">방법 1</span> /agents 명령 (권장)</h4>
+        <ul>
+          <li>Create new agent 선택</li>
+          <li>Personal (전체) 또는 Project (현재만) 선택</li>
+          <li>Generate with Claude → 역할 설명 입력</li>
+          <li>도구 범위, 모델, 배경색 선택 → 저장</li>
+        </ul>
+      </div>
+      <div class="desc-block">
+        <h4><span class="tag tag-blue">방법 2</span> 마크다운 파일 직접 작성</h4>
+        <ul>
+          <li>개인용: <code style="color:var(--accent-soft)">~/.claude/agents/</code></li>
+          <li>프로젝트용: <code style="color:var(--accent-soft)">.claude/agents/</code></li>
+        </ul>
+      </div>
+      <div class="section-label">호출 방법</div>
+      <div class="code-example"><span class="comment"># 자동 위임 (description 매칭)</span>
+<span class="prompt">&gt;</span> 이 코드 리뷰해줘
+
+<span class="comment"># 명시적 호출</span>
+<span class="prompt">&gt;</span> <span class="highlight">code-reviewer</span> 에이전트로 분석해줘</div>
+    </div>
+    <div class="body-right">
+      <div class="section-label">파일 구조 예시</div>
+      <div class="code-example" style="margin-bottom:14px"><span class="comment"># .claude/agents/code-reviewer.md</span>
+<span class="keyword">---</span>
+name: <span class="highlight">code-reviewer</span>
+description: 코드 품질을 분석하고
+  가독성, 성능, 보안 관점에서
+  개선사항을 제안합니다.
+tools: <span class="success">Read, Grep, Glob</span>
+model: <span class="keyword">sonnet</span>
+<span class="keyword">---</span>
+
+<span class="highlight"># Code Reviewer Agent</span>
+
+<span class="keyword">## 역할</span>
+시니어 소프트웨어 엔지니어로서
+코드 리뷰를 전담합니다.
+
+<span class="keyword">## 리뷰 기준</span>
+- 가독성: 변수명, 함수 구조
+- 성능: 불필요한 반복, 메모리 누수
+- 보안: SQL 인젝션, XSS
+- 모범사례: 프로젝트 컨벤션 준수</div>
+      <div class="section-label">YAML 필드</div>
+      <table class="mini-table">
+        <tr><th>필드</th><th>필수</th><th>설명</th></tr>
+        <tr><td>name</td><td style="color:var(--emerald)">✅</td><td>에이전트 식별자</td></tr>
+        <tr><td>description</td><td style="color:var(--emerald)">✅</td><td>자동 위임 판단 기준</td></tr>
+        <tr><td>tools</td><td style="color:var(--text-dim)">선택</td><td>허용 도구 (생략 시 전체 상속)</td></tr>
+        <tr><td>model</td><td style="color:var(--text-dim)">선택</td><td>sonnet / opus / haiku</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="slide-footer">19 / 41</div>
+</div>
+
+
+<!-- ====== CH4-3: Sub Agent 저장 위치 + 프로젝트 구조 ====== -->
+<div class="slide">
+  <div class="slide-header">
+    <div class="slide-num">Chapter 4 — Sub Agent</div>
+    <div class="slide-title">저장 위치와 프로젝트 전체 파일 구조</div>
+  </div>
+  <div class="slide-summary">개인용 = 모든 프로젝트. 프로젝트용 = 해당 리포만. <strong>같은 이름이면 프로젝트 레벨 우선</strong></div>
+  <div class="slide-body">
+    <div class="body-left">
+      <div class="section-label">저장 위치별 범위</div>
+      <div class="compare-row">
+        <div class="compare-card" style="border-color:rgba(255,102,0,0.2);background:rgba(255,102,0,0.05)">
+          <h5 style="color:var(--accent-soft)">개인용 (User)</h5>
+          <p><code style="font-size:12px">~/.claude/agents/</code><br>모든 프로젝트에서 사용 가능</p>
+        </div>
+        <div class="compare-card" style="border-color:rgba(59,130,246,0.2);background:rgba(59,130,246,0.05)">
+          <h5 style="color:var(--blue-soft)">프로젝트용 (Project)</h5>
+          <p><code style="font-size:12px">.claude/agents/</code><br>해당 프로젝트만. Git 커밋 시 팀 공유</p>
+        </div>
+      </div>
+      <div class="section-label" style="margin-top:10px">도구 제한 패턴</div>
+      <div class="code-example"><span class="comment"># Read-only (리뷰·분석용)</span>
+tools: <span class="success">Read, Grep, Glob</span>
+
+<span class="comment"># 코드 수정 가능 (구현용)</span>
+tools: <span class="keyword">Read, Write, Edit, Bash, Grep</span>
+
+<span class="comment"># 전체 도구 상속</span>
+<span class="comment"># tools 필드를 아예 쓰지 않음</span></div>
+    </div>
+    <div class="body-right">
+      <div class="section-label">프로젝트 전체 파일 구조</div>
+      <div class="code-example"><span class="highlight">my-project/</span>
+├── <span class="keyword">.claude/</span>
+│   ├── <span class="highlight">agents/</span>              <span class="comment"># 프로젝트 Sub Agent</span>
+│   │   ├── code-reviewer.md
+│   │   ├── test-writer.md
+│   │   └── security-auditor.md
+│   ├── settings.json        <span class="comment"># hooks, 권한</span>
+│   └── commands/             <span class="comment"># 슬래시 커맨드</span>
+├── <span class="highlight">CLAUDE.md</span>                <span class="comment"># 프로젝트 메모리</span>
+└── <span class="highlight">.mcp.json</span>                <span class="comment"># MCP 설정 (팀 공유)</span>
+
+<span class="keyword">~/.claude/</span>
+├── <span class="highlight">agents/</span>                  <span class="comment"># 개인 Sub Agent</span>
+│   └── general-assistant.md
+├── <span class="highlight">CLAUDE.md</span>                <span class="comment"># 글로벌 메모리</span>
+└── settings.json            <span class="comment"># 전역 설정</span></div>
+    </div>
+  </div>
+  <div class="slide-footer">20 / 41</div>
+</div>
+
+
+<!-- ====== CH4-4: Sub Agent vs MCP ====== -->
+<div class="slide">
+  <div class="slide-header">
+    <div class="slide-num">Chapter 4 — Sub Agent</div>
+    <div class="slide-title">Sub Agent vs MCP — 차이점과 조합</div>
+  </div>
+  <div class="slide-summary">MCP = <strong>외부 시스템 연결 도구</strong>. Sub Agent = <strong>AI가 전문 역할로 작업하는 인스턴스</strong>. 대체가 아닌 <strong>조합</strong></div>
+  <div class="slide-body">
+    <div class="body-left">
+      <div class="section-label">핵심 비교</div>
+      <table class="mini-table">
+        <tr><th>구분</th><th style="color:var(--accent-soft)">Sub Agent</th><th style="color:var(--teal-soft)">MCP 서버</th></tr>
+        <tr><td>정체</td><td>특화된 Claude 인스턴스</td><td>외부 도구/서비스 연결</td></tr>
+        <tr><td>동작</td><td>독립 컨텍스트에서 AI 작업</td><td>외부 프로세스가 기능 제공</td></tr>
+        <tr><td>컨텍스트</td><td>자체 윈도우 (분리)</td><td>메인 윈도우 공유·소모</td></tr>
+        <tr><td>설정</td><td>마크다운 파일</td><td>JSON 설정</td></tr>
+        <tr><td>호출</td><td>자동 위임 / 이름 지정</td><td>도구(tool)로 호출</td></tr>
+        <tr><td>할 수 있는 일</td><td>AI 추론 작업</td><td>외부 시스템 연동</td></tr>
+      </table>
+      <div class="callout" style="margin-top:12px">
+        <strong>조합 예시:</strong> security-auditor Sub Agent가<br>
+        Serena MCP의 <code style="color:var(--teal-soft)">find_symbol</code>을 사용하여 취약 함수를 추적
+      </div>
+    </div>
+    <div class="body-right">
+      <div class="section-label">언제 무엇을 쓰는가?</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;background:rgba(13,148,136,0.08);border:1px solid rgba(13,148,136,0.2)">
+          <span class="tag tag-teal" style="flex-shrink:0">MCP</span>
+          <span style="font-size:13px;color:var(--text-muted)">GitHub PR 자동 생성</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;background:rgba(255,102,0,0.08);border:1px solid rgba(255,102,0,0.2)">
+          <span class="tag tag-accent" style="flex-shrink:0">Agent</span>
+          <span style="font-size:13px;color:var(--text-muted)">코드 리뷰</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;background:rgba(13,148,136,0.08);border:1px solid rgba(13,148,136,0.2)">
+          <span class="tag tag-teal" style="flex-shrink:0">MCP</span>
+          <span style="font-size:13px;color:var(--text-muted)">DB에서 사용자 데이터 조회</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;background:rgba(255,102,0,0.08);border:1px solid rgba(255,102,0,0.2)">
+          <span class="tag tag-accent" style="flex-shrink:0">Agent</span>
+          <span style="font-size:13px;color:var(--text-muted)">테스트 코드 작성</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;background:rgba(13,148,136,0.08);border:1px solid rgba(13,148,136,0.2)">
+          <span class="tag tag-teal" style="flex-shrink:0">MCP</span>
+          <span style="font-size:13px;color:var(--text-muted)">심볼 단위 함수 검색 (Serena)</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;background:rgba(255,102,0,0.08);border:1px solid rgba(255,102,0,0.2)">
+          <span class="tag tag-accent" style="flex-shrink:0">Agent</span>
+          <span style="font-size:13px;color:var(--text-muted)">보안 취약점 분석</span>
+        </div>
+      </div>
+      <div style="margin-top:14px;padding:10px 14px;border-radius:8px;background:rgba(167,139,250,0.08);border:1px solid rgba(167,139,250,0.2);text-align:center">
+        <span style="font-size:13px;font-weight:600;color:var(--purple-soft)">MCP + Sub Agent = 조합하여 사용</span>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">21 / 41</div>
+</div>
+
+
+<!-- ====== SUMMARY: 기초편 전체 요약 ====== -->
+<div class="slide">
+  <div class="slide-header">
+    <div class="slide-num">기초편 요약</div>
+    <div class="slide-title">기초편 전체 정리 — 빠른 참조</div>
+  </div>
+  <div class="slide-summary">4개 챕터의 핵심 명령어와 개념을 <strong>한 장으로 요약</strong></div>
+  <div class="slide-body">
+    <div class="body-left">
+      <div class="section-label">CH1. CLI 설치</div>
+      <div class="code-example" style="font-size:12px;padding:10px;margin-bottom:12px"><span class="comment"># 네이티브 설치 (권장)</span>
+<span class="keyword">irm</span> https://claude.ai/install.ps1 | iex <span class="comment"># Win</span>
+<span class="keyword">curl</span> -fsSL https://claude.ai/install.sh | bash
+claude --version  |  claude doctor</div>
+
+      <div class="section-label">CH2. 프로젝트 설정</div>
+      <div class="code-example" style="font-size:12px;padding:10px;margin-bottom:12px">git init → claude → <span class="keyword">/init</span> → CLAUDE.md 생성
+<span class="comment"># 계층: 글로벌 > 프로젝트 > 로컬 > 하위</span>
+<span class="comment"># 200줄 이하 유지, 길면 분리·참조</span></div>
+
+      <div class="section-label">CH3. MCP 서버</div>
+      <div class="code-example" style="font-size:12px;padding:10px;margin-bottom:12px">claude mcp <span class="keyword">add</span> &lt;이름&gt; -- &lt;명령&gt;
+<span class="comment"># Serena (토큰 70~80% 절감)</span>
+<span class="comment"># Sequential Thinking (단계별 사고)</span>
+<span class="comment"># 동시 활성화 3~5개 이내 권장</span></div>
+
+      <div class="section-label">CH4. Sub Agent</div>
+      <div class="code-example" style="font-size:12px;padding:10px"><span class="keyword">/agents</span> → 생성·조회·편집
+<span class="comment"># MCP = 외부 도구 연결</span>
+<span class="comment"># Sub Agent = AI 전문 역할 인스턴스</span>
+<span class="comment"># 둘은 조합하여 사용</span></div>
+    </div>
+    <div class="body-right">
+      <div class="section-label">프로젝트 전체 구조 한눈에</div>
+      <svg viewBox="0 0 460 460" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:460px">
+        <text x="230" y="24" text-anchor="middle" fill="#64748B" font-size="13" font-weight="700" font-family="Pretendard,-apple-system,BlinkMacSystemFont,sans-serif">PROJECT STRUCTURE</text>
+
+        <!-- Project box -->
+        <rect x="20" y="40" width="420" height="340" rx="10" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.1)"/>
+        <text x="40" y="64" fill="var(--text)" font-size="14" font-weight="700" font-family="Pretendard,-apple-system,BlinkMacSystemFont,sans-serif">my-project/</text>
+
+        <!-- CLAUDE.md -->
+        <rect x="40" y="78" width="180" height="38" rx="6" fill="rgba(255,102,0,0.1)" stroke="rgba(255,102,0,0.25)"/>
+        <text x="130" y="101" text-anchor="middle" fill="#FF8833" font-size="12" font-weight="600" font-family="Pretendard,-apple-system,BlinkMacSystemFont,sans-serif">CLAUDE.md</text>
+        <text x="240" y="101" fill="#64748B" font-size="11" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">← 프로젝트 메모리 (CH2)</text>
+
+        <!-- .mcp.json -->
+        <rect x="40" y="124" width="180" height="38" rx="6" fill="rgba(13,148,136,0.1)" stroke="rgba(13,148,136,0.25)"/>
+        <text x="130" y="147" text-anchor="middle" fill="#14B8A6" font-size="12" font-weight="600" font-family="Pretendard,-apple-system,BlinkMacSystemFont,sans-serif">.mcp.json</text>
+        <text x="240" y="147" fill="#64748B" font-size="11" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">← MCP 팀 설정 (CH3)</text>
+
+        <!-- .claude/ -->
+        <rect x="40" y="170" width="380" height="130" rx="8" fill="rgba(59,130,246,0.05)" stroke="rgba(59,130,246,0.15)"/>
+        <text x="60" y="192" fill="#60A5FA" font-size="12" font-weight="600" font-family="Pretendard,-apple-system,BlinkMacSystemFont,sans-serif">.claude/</text>
+
+        <rect x="60" y="200" width="160" height="32" rx="4" fill="rgba(255,102,0,0.08)" stroke="rgba(255,102,0,0.15)"/>
+        <text x="140" y="220" text-anchor="middle" fill="#FF8833" font-size="11" font-family="Pretendard,-apple-system,BlinkMacSystemFont,sans-serif">agents/</text>
+        <text x="240" y="220" fill="#64748B" font-size="11" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">← Sub Agent (CH4)</text>
+
+        <rect x="60" y="240" width="160" height="32" rx="4" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)"/>
+        <text x="140" y="260" text-anchor="middle" fill="#94A3B8" font-size="11" font-family="Pretendard,-apple-system,BlinkMacSystemFont,sans-serif">settings.json</text>
+        <text x="240" y="260" fill="#64748B" font-size="11" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">← hooks, 권한</text>
+
+        <rect x="60" y="275" width="160" height="20" rx="4" fill="rgba(255,255,255,0.02)"/>
+        <text x="140" y="290" text-anchor="middle" fill="#475569" font-size="11" font-family="Pretendard,-apple-system,BlinkMacSystemFont,sans-serif">commands/</text>
+
+        <!-- Global -->
+        <text x="230" y="330" text-anchor="middle" fill="#64748B" font-size="11" font-weight="700" font-family="Pretendard,-apple-system,BlinkMacSystemFont,sans-serif">── GLOBAL (HOME) ──</text>
+        <rect x="40" y="340" width="180" height="32" rx="6" fill="rgba(167,139,250,0.08)" stroke="rgba(167,139,250,0.15)"/>
+        <text x="130" y="360" text-anchor="middle" fill="#C4B5FD" font-size="11" font-family="Pretendard,-apple-system,BlinkMacSystemFont,sans-serif">~/.claude/CLAUDE.md</text>
+        <text x="240" y="360" fill="#64748B" font-size="11" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">← 개인 글로벌 (CH2)</text>
+
+        <!-- Next -->
+        <text x="230" y="420" text-anchor="middle" fill="#F59E0B" font-size="13" font-weight="600" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">다음 → 심화편: AI Agent 사용상 주의점</text>
+        <text x="230" y="444" text-anchor="middle" fill="#475569" font-size="12" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">명확한 지시 · 파일 저장 원칙 · 작업 시작/종료 절차</text>
+      </svg>
+    </div>
+  </div>
+  <div class="slide-footer">22 / 41</div>
+</div>
+
+<!-- ====== SLIDE 23: 심화편 섹션 구분자 ====== -->
+<!-- ====== COVER ====== -->
+<div class="slide" style="justify-content:center;align-items:center;background:linear-gradient(160deg,var(--navy) 0%,#0F1724 60%,var(--navy) 100%)">
+  <div style="text-align:center;padding:60px">
+    <div style="font-size:14px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:24px;font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif">AI Agent 사용자 교육 가이드</div>
+    <h1 style="font-size:46px;font-weight:800;line-height:1.2;letter-spacing:-1px;margin-bottom:20px">심화편</h1>
+    <div style="width:60px;height:3px;background:var(--accent);margin:0 auto 24px"></div>
+    <p style="font-size:18px;color:var(--text-muted);font-weight:400;line-height:1.7">구조적 한계 · 사용상 주의점 · 컨텍스트 관리 · 컨텍스트 격리</p>
+    <div style="margin-top:48px;font-size:13px;color:var(--text-dim);font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif">2026-03-27</div>
+    <div style="margin-top:12px;font-size:14px;color:var(--text-muted);font-weight:400">정우철 (mykumi@gmail.com)</div>
+  </div>
+  <div class="slide-footer">23 / 41</div>
+</div>
+
+<!-- ====== S2: 4가지 한계 개요 ====== -->
+<div class="slide">
+  <div class="slide-header"><div class="slide-num">심화편 도입</div><div class="slide-title">AI Agent의 4가지 구조적 한계</div></div>
+  <div class="slide-summary">사람 동료에게 발생하는 오해·독단·삽질의 패턴이 AI Agent에게도 <strong>똑같이 나타납니다</strong></div>
+  <div class="slide-body">
+    <div class="body-left">
+      <div class="limit-card" style="background:rgba(59,130,246,0.06);border-color:rgba(59,130,246,0.2)"><div class="num" style="color:var(--blue-soft)">한계 ①</div><div class="title">지시가 없으면 자기 판단으로 실행</div><div class="desc">모르는 부분을 추론으로 채워서 끝까지 실행. 물어보지 않음</div></div>
+      <div class="limit-card" style="background:rgba(255,102,0,0.06);border-color:rgba(255,102,0,0.2)"><div class="num" style="color:var(--accent-soft)">한계 ②</div><div class="title">대화가 길어지면 지침보다 대화 흐름 우선</div><div class="desc">초반에 따르던 CLAUDE.md 지침이 대화 흐름에 밀려 무시됨</div></div>
+      <div class="limit-card" style="background:rgba(244,63,94,0.06);border-color:rgba(244,63,94,0.2)"><div class="num" style="color:#FB7185">한계 ③</div><div class="title">문제가 안 풀리면 악순환에 빠진다</div><div class="desc">단편적 해결 → 파생 문제 → 또 단편적 해결 → 끝없는 딥다이브</div></div>
+      <div class="limit-card" style="background:rgba(245,158,11,0.06);border-color:rgba(245,158,11,0.2)"><div class="num" style="color:var(--amber)">한계 ④</div><div class="title">추론으로 채운 부분을 말하지 않는다</div><div class="desc">지시 해석·실행 방법의 내부 판단을 사용자가 알 수 없음</div></div>
+    </div>
+    <div class="body-right">
+      <div class="section-label">근본 원인</div>
+      <div style="padding:20px;border-radius:10px;background:rgba(244,63,94,0.06);border:1px solid rgba(244,63,94,0.2);text-align:center;margin-bottom:20px">
+        <div style="font-size:16px;font-weight:700;color:var(--text);line-height:1.6;margin-bottom:8px">AI Agent는<br><span style="color:#FB7185">"모르겠습니다"</span>라고 말하는 것보다<br><span style="color:var(--accent-soft)">"그럴듯하게 실행하는 것"</span>에<br>최적화되어 있다</div>
+      </div>
+      <div style="padding:16px;border-radius:10px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.2);text-align:center">
+        <div style="font-size:12px;font-weight:700;letter-spacing:1px;color:var(--emerald);margin-bottom:8px;font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif">대응 원칙</div>
+        <div style="font-size:14px;font-weight:600;color:var(--text);line-height:1.6">AI Agent가 스스로 판단하는 영역을 최소화하고,<br>판단이 필요한 부분은 사람이 명시적으로 결정한다</div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">24 / 41</div>
+</div>
+
+
+<!-- ====== S3: 한계① ====== -->
+<div class="slide">
+  <div class="slide-header"><div class="slide-num">한계 ①</div><div class="slide-title">지시가 없으면 자기 판단으로 실행한다</div></div>
+  <div class="slide-summary">사람이라면 멈추거나 물어보지만, AI Agent는 <strong>추론으로 채워서 끝까지 실행</strong></div>
+  <div class="slide-body">
+    <div class="body-left">
+      <div class="section-label">사람 vs AI Agent</div>
+      <div style="display:flex;gap:12px;margin-bottom:16px">
+        <div style="flex:1;padding:14px;border-radius:8px;border:1px solid rgba(16,185,129,0.2);background:rgba(16,185,129,0.05)"><div style="font-size:12px;font-weight:700;color:var(--emerald);font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;margin-bottom:6px">사람 동료</div><div style="font-size:13px;color:var(--text-muted);line-height:1.6">"잘 모르겠는데, 어떻게 할까요?"<br><span style="color:var(--emerald)">→ 물어봄</span></div></div>
+        <div style="flex:1;padding:14px;border-radius:8px;border:1px solid rgba(244,63,94,0.2);background:rgba(244,63,94,0.05)"><div style="font-size:12px;font-weight:700;color:#FB7185;font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;margin-bottom:6px">AI Agent</div><div style="font-size:13px;color:var(--text-muted);line-height:1.6">"JWT가 적절하겠군"<br><span style="color:#FB7185">→ 실행해버림</span></div></div>
+      </div>
+      <div class="callout-rose"><strong>위험:</strong> AI Agent가 어떤 부분을 추론으로 판단했는지 사용자가 알 수 없음</div>
+    </div>
+    <div class="body-right">
+      <div class="section-label">실제 발생 패턴</div>
+      <div class="code-example"><span class="prompt">></span> 로그인 기능 만들어줘
+
+<span class="comment">[AI Agent 내부 해석 — 사용자 모름]</span>
+  프레임워크? → <span class="danger">React+Express 추정</span>
+  인증 방식?  → <span class="danger">JWT 추정</span>
+  DB?        → <span class="danger">SQLite 추정</span>
+  암호화?    → <span class="danger">bcrypt 추정</span>
+  소셜 로그인 → <span class="danger">없다고 추정</span>
+
+→ <span class="highlight">의도와 다른 스택으로 구현됨</span></div>
+      <div style="margin-top:14px;padding:12px 16px;border-radius:8px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.2)"><div style="font-size:13px;color:var(--text-muted);line-height:1.6"><span style="color:var(--emerald)">✓</span> What+How+Scope 명시<br><span style="color:var(--emerald)">✓</span> 추론 필요 부분은 "확인 요청" 지시<br><span style="color:var(--emerald)">✓</span> Plan Mode로 실행 전 계획 확인</div></div>
+    </div>
+  </div>
+  <div class="slide-footer">25 / 41</div>
+</div>
+
+
+<!-- ====== S4: 한계② ====== -->
+<div class="slide">
+  <div class="slide-header"><div class="slide-num">한계 ②</div><div class="slide-title">대화가 길어지면 지침보다 대화 흐름을 우선</div></div>
+  <div class="slide-summary">CLAUDE.md 지침이 있어도, 대화가 쌓이면 <strong>최근 맥락이 압도적 비중</strong>을 차지하며 지침 밀어냄</div>
+  <div class="slide-body">
+    <div class="body-left">
+      <div class="section-label">지침 준수율 변화</div>
+      <div class="code-example" style="margin-bottom:14px"><span class="comment">[세션 초반]</span>
+  CLAUDE.md: <span class="success">"모든 변경은 승인 후 적용"</span>
+  → 지침을 <span class="success">잘 따름</span>
+
+<span class="comment">[세션 중반 — 대화 50회 이후]</span>
+  "이것도 수정해줘" "저것도 바꿔줘"
+  → <span class="danger">"바로 실행" 패턴 형성</span>
+  → <span class="danger">승인 없이 바로 수정</span></div>
+      <div class="callout-rose"><strong>위험:</strong> 사용자는 지침이 지켜지고 있다고 생각하지만, AI Agent는 이미 대화 흐름에 의해 지침을 무시 중</div>
+    </div>
+    <div class="body-right">
+      <div class="section-label">컨텍스트 내 비중 변화</div>
+      <svg viewBox="0 0 440 260" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:440px">
+        <text x="110" y="20" text-anchor="middle" fill="#64748B" font-size="12" font-weight="700" font-family="Pretendard,-apple-system,BlinkMacSystemFont,sans-serif">세션 초반</text>
+        <rect x="30" y="28" width="160" height="110" rx="8" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.1)"/>
+        <rect x="34" y="32" width="152" height="28" rx="4" fill="rgba(255,102,0,0.2)"/><text x="110" y="50" text-anchor="middle" fill="#FF8833" font-size="11" font-weight="600" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">지침 (15%)</text>
+        <rect x="34" y="64" width="152" height="36" rx="4" fill="rgba(59,130,246,0.15)"/><text x="110" y="86" text-anchor="middle" fill="#60A5FA" font-size="11" font-weight="600" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">대화 (20%)</text>
+        <rect x="34" y="104" width="152" height="30" rx="4" fill="rgba(16,185,129,0.1)"/><text x="110" y="123" text-anchor="middle" fill="#10B981" font-size="11" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">여유 (65%)</text>
+        <text x="330" y="20" text-anchor="middle" fill="#64748B" font-size="12" font-weight="700" font-family="Pretendard,-apple-system,BlinkMacSystemFont,sans-serif">세션 중반</text>
+        <rect x="250" y="28" width="160" height="110" rx="8" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.1)"/>
+        <rect x="254" y="32" width="152" height="10" rx="3" fill="rgba(255,102,0,0.15)"/><text x="330" y="40" text-anchor="middle" fill="#FF8833" font-size="9" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">지침 (3%)</text>
+        <rect x="254" y="46" width="152" height="82" rx="4" fill="rgba(244,63,94,0.15)"/><text x="330" y="90" text-anchor="middle" fill="#FB7185" font-size="12" font-weight="600" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">대화 (70%)</text>
+        <rect x="254" y="132" width="152" height="4" rx="2" fill="rgba(16,185,129,0.08)"/>
+        <defs><marker id="ah2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#475569"/></marker></defs>
+        <line x1="200" y1="83" x2="240" y2="83" stroke="#475569" stroke-width="2" marker-end="url(#ah2)"/>
+        <rect x="30" y="170" width="380" height="70" rx="8" fill="rgba(16,185,129,0.06)" stroke="rgba(16,185,129,0.2)"/>
+        <text x="220" y="194" text-anchor="middle" fill="#10B981" font-size="13" font-weight="700" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">대응</text>
+        <text x="220" y="214" text-anchor="middle" fill="#94A3B8" font-size="12" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">✓ /compact 주기적 압축 · ✓ /clear 작업 전환 시</text>
+        <text x="220" y="232" text-anchor="middle" fill="#94A3B8" font-size="12" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">✓ 중요 원칙은 대화 중에도 반복 환기</text>
+      </svg>
+    </div>
+  </div>
+  <div class="slide-footer">26 / 41</div>
+</div>
+
+
+<!-- ====== S5: 한계③ 악순환 ====== -->
+<div class="slide">
+  <div class="slide-header"><div class="slide-num">한계 ③</div><div class="slide-title">문제가 안 풀리면 악순환에 빠진다</div></div>
+  <div class="slide-summary">한계 ①②가 결합 → <strong>단편적 해결 → 파생 문제 → 또 단편적 해결</strong>의 끝없는 딥다이브</div>
+  <div class="slide-body">
+    <div class="body-left">
+      <div class="section-label">사람과의 차이</div>
+      <div class="desc-block"><p>사람은 "근본적으로 접근이 잘못됐다"고 멈출 수 있지만, AI Agent는 <strong>멈추지 않고 계속 파고듦</strong></p></div>
+      <div class="callout-rose"><strong>위험:</strong> 10분 악순환의 코드 변경 → 되돌리는 데 30분+</div>
+      <div style="margin-top:14px;padding:12px 16px;border-radius:8px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.2)"><div style="font-size:13px;font-weight:700;color:var(--emerald);margin-bottom:6px">대응</div><div style="font-size:13px;color:var(--text-muted);line-height:1.6"><span style="color:var(--emerald)">✓</span> 2~3회 시도 후 안 되면 멈추라고 명시<br><span style="color:var(--emerald)">✓</span> 단계별 지시로 한 번에 한 가지만<br><span style="color:var(--emerald)">✓</span> 변경 전 git commit으로 롤백 지점 확보</div></div>
+    </div>
+    <div class="body-right">
+      <div class="section-label">악순환 사이클</div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:0">
+        <div style="width:290px;padding:10px 14px;border-radius:8px;background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.25);text-align:center;font-size:14px;font-weight:600;color:var(--blue-soft)">문제 발생</div>
+        <div class="flow-arrow-down"></div>
+        <div style="width:290px;padding:10px 14px;border-radius:8px;background:rgba(255,102,0,0.1);border:1px solid rgba(255,102,0,0.25);text-align:center;font-size:13px;color:var(--accent-soft)">자기 판단으로 해결 시도</div>
+        <div class="flow-arrow-down"></div>
+        <div style="width:290px;padding:10px 14px;border-radius:8px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.25);text-align:center;font-size:13px;color:var(--amber)">단편적 해결 (증상만 처리)</div>
+        <div class="flow-arrow-down"></div>
+        <div style="width:290px;padding:10px 14px;border-radius:8px;background:rgba(244,63,94,0.1);border:1px solid rgba(244,63,94,0.25);text-align:center;font-size:13px;color:#FB7185">파생 문제 발생</div>
+        <div class="flow-arrow-down"></div>
+        <div style="width:290px;padding:10px 14px;border-radius:8px;background:rgba(244,63,94,0.15);border:1px solid rgba(244,63,94,0.3);text-align:center;font-size:13px;color:#FB7185">또 자기 판단으로 시도 (대화 매몰)</div>
+        <div class="flow-arrow-down"></div>
+        <div style="width:290px;padding:12px 14px;border-radius:8px;background:rgba(244,63,94,0.2);border:2px solid rgba(244,63,94,0.4);text-align:center"><div style="font-size:14px;font-weight:700;color:#FB7185">목표와 지침을 잃어버림</div><div style="font-size:11px;color:var(--text-dim);margin-top:3px">↑ 루프 반복</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">27 / 41</div>
+</div>
+
+
+<!-- ====== S6: 한계④ 숨은 추론 ====== -->
+<div class="slide">
+  <div class="slide-header"><div class="slide-num">한계 ④</div><div class="slide-title">추론으로 채운 부분을 말하지 않는다</div></div>
+  <div class="slide-summary">빠진 부분을 <strong>추론으로 판단하고, 추론 사실 자체를 알리지 않음</strong></div>
+  <div class="slide-body">
+    <div class="body-left">
+      <div class="section-label">실제 패턴</div>
+      <div class="code-example"><span class="prompt">></span> 결제 API, 토스페이먼츠 연동
+
+<span class="comment">[AI Agent 추론 — 사용자 모름]</span>
+  상태 관리: <span class="danger">직접 상태 머신</span>   ← 추론
+  에러 처리: <span class="danger">3회 재시도</span>       ← 추론
+  부분 환불: <span class="danger">미구현</span>           ← 추론
+  동시 요청: <span class="danger">낙관적 락</span>        ← 추론
+  로깅:     <span class="danger">console.log</span>      ← 추론</div>
+      <div class="callout-rose"><strong>위험:</strong> 추론 문제가 드러나는 건 보통 3~4단계 후</div>
+    </div>
+    <div class="body-right">
+      <div class="section-label">겉 vs 실제</div>
+      <div style="display:flex;gap:12px;margin-bottom:16px">
+        <div style="flex:1;padding:14px;border-radius:8px;border:1px solid rgba(16,185,129,0.2);background:rgba(16,185,129,0.05);text-align:center"><div style="font-size:12px;font-weight:700;color:var(--emerald);font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;margin-bottom:6px">겉으로</div><div style="font-size:28px;margin:8px 0">✅</div><div style="font-size:13px;color:var(--text-muted)">"잘 동작하네"</div></div>
+        <div style="flex:1;padding:14px;border-radius:8px;border:1px solid rgba(244,63,94,0.2);background:rgba(244,63,94,0.05);text-align:center"><div style="font-size:12px;font-weight:700;color:#FB7185;font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;margin-bottom:6px">실제</div><div style="font-size:28px;margin:8px 0">⚠️</div><div style="font-size:13px;color:var(--text-muted)">5가지 중 2개<br>의도와 다름</div></div>
+      </div>
+      <div style="padding:16px;border-radius:10px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.2)"><div style="font-size:13px;font-weight:700;color:var(--emerald);margin-bottom:8px">대응</div><div style="font-size:13px;color:var(--text-muted);line-height:1.8"><span style="color:var(--emerald)">✓</span> <strong style="color:var(--text)">Plan Mode</strong> — 실행 전 계획 확인<br><span style="color:var(--emerald)">✓</span> <strong style="color:var(--text)">수행결과 보고서</strong> — 판단 내역 문서화<br><span style="color:var(--emerald)">✓</span> <strong style="color:var(--text)">범위 밖 명시</strong> — 경계를 명확히<br><span style="color:var(--emerald)">✓</span> <strong style="color:var(--text)">"모호하면 물어봐"</strong> 지시</div></div>
+    </div>
+  </div>
+  <div class="slide-footer">28 / 41</div>
+</div>
+
+
+<!-- ====== S7: 좋은 지시 7요소 ====== -->
+<div class="slide">
+  <div class="slide-header"><div class="slide-num">심화 1장 — 사용상 주의점</div><div class="slide-title">좋은 지시의 7가지 요소</div></div>
+  <div class="slide-summary">AI Agent에게 <strong>판단의 여지를 최소화</strong>하는 지시 구조 — Why부터 Verify까지</div>
+  <div class="slide-body">
+    <div class="body-left">
+      <div class="section-label">7가지 요소</div>
+      <table class="mini-table">
+        <tr><th>요소</th><th>설명</th><th>예시</th></tr>
+        <tr><td style="color:var(--accent-soft)">Why</td><td>목적과 의도</td><td>이탈률 줄이기 위해 UX 개선</td></tr>
+        <tr><td>What</td><td>무엇을</td><td>프로필 수정 API 구현</td></tr>
+        <tr><td>How</td><td>기술/방법</td><td>NestJS, Prisma, class-validator</td></tr>
+        <tr><td>Scope</td><td>범위와 경계</td><td>이메일, 닉네임만. 비밀번호 제외</td></tr>
+        <tr><td>Reference</td><td>참고 자료</td><td>prisma.io/docs 참고</td></tr>
+        <tr><td>Constraint</td><td>제약 조건</td><td>기존 테스트 깨지면 안 됨</td></tr>
+        <tr><td>Verify</td><td>검증 방법</td><td>npm test + 수동 PUT 테스트</td></tr>
+      </table>
+      <div class="callout"><strong>Why + What + Scope</strong>는 항상 포함. <strong>Reference</strong>는 최신 기술·사내 규칙 시 필수</div>
+    </div>
+    <div class="body-right">
+      <div class="section-label">Why가 있을 때 vs 없을 때</div>
+      <div style="display:flex;gap:12px;margin-bottom:16px">
+        <div style="flex:1;padding:14px;border-radius:8px;border:1px solid rgba(244,63,94,0.2);background:rgba(244,63,94,0.05)"><div style="font-size:12px;font-weight:700;color:#FB7185;font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;margin-bottom:6px">Why 없음</div><div style="font-size:13px;color:var(--text-muted);line-height:1.6">"프로필 수정 API 만들어줘"<br>→ 기계적 CRUD 구현<br>→ 판단 기준 없이 기본값</div></div>
+        <div style="flex:1;padding:14px;border-radius:8px;border:1px solid rgba(16,185,129,0.2);background:rgba(16,185,129,0.05)"><div style="font-size:12px;font-weight:700;color:var(--emerald);font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;margin-bottom:6px">Why 있음</div><div style="font-size:13px;color:var(--text-muted);line-height:1.6">"이탈률 줄이려고 UX 개선 중"<br>→ UX 친화적 유효성 검사<br>→ 사용자 관점 에러 메시지</div></div>
+      </div>
+      <div class="section-label">실전 지시문 예시</div>
+      <div class="code-example"><span class="prompt">></span> <span class="highlight">[Why]</span> 회원 이탈률을 줄이기 위해
+<span class="prompt">></span> <span class="highlight">[What]</span> 프로필 수정 API를 구현해줘
+<span class="prompt">></span> <span class="highlight">[How]</span> NestJS + Prisma + class-validator
+<span class="prompt">></span> <span class="highlight">[Scope]</span> 이메일, 닉네임만 (비밀번호 제외)
+<span class="prompt">></span> <span class="highlight">[Ref]</span> src/auth/auth.service.ts 패턴
+<span class="prompt">></span> <span class="highlight">[Verify]</span> npm test 통과 확인</div>
+    </div>
+  </div>
+  <div class="slide-footer">29 / 41</div>
+</div>
+
+
+<!-- ====== S8: 모호한 지시의 문제 + 비교표 ====== -->
+<div class="slide">
+  <div class="slide-header"><div class="slide-num">심화 1장 — 사용상 주의점</div><div class="slide-title">"잘 만들어줘"는 지시가 아니다</div></div>
+  <div class="slide-summary">"잘 해줘", "적절하게 해줘", "알아서 해줘"는 <strong>실질적 정보가 0</strong>입니다</div>
+  <div class="slide-body">
+    <div class="body-left">
+      <div class="section-label">모호한 지시 vs 명확한 지시</div>
+      <table class="mini-table">
+        <tr><th>모호한 지시</th><th>문제</th><th>명확한 지시</th></tr>
+        <tr><td>"API 만들어줘"</td><td>스택, 구조 모두 추정</td><td>"NestJS REST API, JWT, Prisma"</td></tr>
+        <tr><td>"테스트 추가해줘"</td><td>범위, 프레임워크 불명</td><td>"Jest로 UserService 단위 테스트"</td></tr>
+        <tr><td>"이거 고쳐줘"</td><td>무엇이 문제인지 불명</td><td>"POST /users 중복 시 500→409"</td></tr>
+        <tr><td>"성능 개선해줘"</td><td>어디를, 얼마나?</td><td>"getUsers N+1 해결, 1초 이내로"</td></tr>
+        <tr><td>"리팩토링해줘"</td><td>기준 없음</td><td>"auth를 controller/service/repo 3계층"</td></tr>
+      </table>
+      <div class="section-label" style="margin-top:14px">모호한 지시가 만드는 실제 문제</div>
+      <div class="desc-block">
+        <p><strong style="color:#FB7185">① 되돌리기 비용</strong> — 잘못된 방향으로 수십 개 파일 수정 후 "이게 아닌데" → 되돌리는 데 원래보다 더 오래 걸림</p>
+        <p style="margin-top:6px"><strong style="color:#FB7185">② 컨텍스트 낭비</strong> — 방향 잡기에 200K 중 절반 소모 → 정작 구현할 공간 부족</p>
+        <p style="margin-top:6px"><strong style="color:#FB7185">③ 누적 오차</strong> — 1단계 모호 → 이후 모든 작업이 잘못된 전제 위에 쌓임</p>
+      </div>
+    </div>
+    <div class="body-right">
+      <div class="section-label">되돌리기 비용 시각화</div>
+      <svg viewBox="0 0 440 140" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:440px;margin-bottom:16px">
+        <text x="20" y="20" fill="#64748B" font-size="11" font-weight="600" font-family="Pretendard,-apple-system,BlinkMacSystemFont,sans-serif">명확한 지시 한 줄</text>
+        <rect x="20" y="28" width="80" height="24" rx="4" fill="rgba(16,185,129,0.2)"/><text x="60" y="44" text-anchor="middle" fill="#10B981" font-size="11" font-weight="600">1분</text>
+        <text x="20" y="80" fill="#64748B" font-size="11" font-weight="600" font-family="Pretendard,-apple-system,BlinkMacSystemFont,sans-serif">모호한 지시 → 되돌리기</text>
+        <rect x="20" y="88" width="400" height="24" rx="4" fill="rgba(244,63,94,0.2)"/><text x="220" y="104" text-anchor="middle" fill="#FB7185" font-size="11" font-weight="600">30분+ (여러 파일 걸쳐 수정됨)</text>
+        <text x="20" y="132" fill="#94A3B8" font-size="11">→ 명확한 지시 한 줄이 되돌리기 30분을 절약</text>
+      </svg>
+      <div class="section-label">누적 오차</div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <div style="padding:8px 12px;border-radius:6px;background:rgba(244,63,94,0.1);border:1px solid rgba(244,63,94,0.2);font-size:12px;color:#FB7185;font-weight:600">1단계 모호</div>
+        <span style="color:var(--text-dim)">→</span>
+        <div style="padding:8px 12px;border-radius:6px;background:rgba(244,63,94,0.15);border:1px solid rgba(244,63,94,0.25);font-size:12px;color:#FB7185;font-weight:600">2단계 잘못된 전제</div>
+        <span style="color:var(--text-dim)">→</span>
+        <div style="padding:8px 12px;border-radius:6px;background:rgba(244,63,94,0.2);border:1px solid rgba(244,63,94,0.3);font-size:12px;color:#FB7185;font-weight:600">3단계 발견</div>
+      </div>
+      <div style="margin-top:6px;font-size:12px;color:var(--text-dim);text-align:center">→ 1단계부터 다시 해야 함</div>
+    </div>
+  </div>
+  <div class="slide-footer">30 / 41</div>
+</div>
+
+
+<!-- ====== S9: 단계별 지시 + Plan Mode ====== -->
+<div class="slide">
+  <div class="slide-header"><div class="slide-num">심화 1장 — 사용상 주의점</div><div class="slide-title">실전 패턴: 단계별 지시와 Plan Mode</div></div>
+  <div class="slide-summary">복잡한 작업은 한 번에 지시하지 말고 <strong>단계별로 나누어</strong> 진행. Plan Mode로 <strong>실행 전 계획을 확인</strong></div>
+  <div class="slide-body">
+    <div class="body-left">
+      <div class="section-label">한 번에 vs 단계별</div>
+      <div class="code-example" style="margin-bottom:14px"><span class="danger"># ❌ 한 번에 모든 것</span>
+<span class="prompt">></span> 사용자 관리 시스템을 만들어줘.
+<span class="prompt">></span> 회원가입, 로그인, 프로필 수정,
+<span class="prompt">></span> 권한 관리, 이메일 인증까지 전부.</div>
+      <div class="code-example"><span class="success"># ✅ 단계별 진행</span>
+<span class="prompt">></span> <span class="keyword">[1단계]</span> DB 스키마를 설계해줘.
+<span class="prompt">></span>   User, Role, Permission 테이블
+<span class="prompt">></span>   → <span class="highlight">리뷰 후 다음 단계 진행</span>
+
+<span class="prompt">></span> <span class="keyword">[2단계]</span> User CRUD API 구현
+<span class="prompt">></span>   POST /users, GET /users/:id
+<span class="prompt">></span>   → <span class="highlight">테스트 통과 확인 후 다음</span>
+
+<span class="prompt">></span> <span class="keyword">[3단계]</span> JWT 인증 추가
+<span class="prompt">></span>   access 15분, refresh 7일
+<span class="prompt">></span>   → <span class="highlight">기존 테스트 깨지지 않는지 확인</span></div>
+    </div>
+    <div class="body-right">
+      <div class="section-label">Plan Mode 활용</div>
+      <div class="desc-block"><p>Claude Code의 Plan Mode를 사용하면 <strong>실행 전에 계획을 먼저 세우고 승인 후 진행</strong>할 수 있습니다.</p></div>
+      <div class="code-example" style="margin-bottom:14px"><span class="comment"># Plan Mode 진입</span>
+<span class="prompt">></span> <span class="keyword">/plan</span>
+
+<span class="comment"># 또는 지시에 포함</span>
+<span class="prompt">></span> 인증 시스템을 OAuth2로
+<span class="prompt">></span> 마이그레이션하는 계획을 세워줘.
+<span class="prompt">></span> <span class="highlight">실행하지 말고 계획만 보여줘.</span>
+<span class="prompt">></span> <span class="highlight">승인 후 진행할게.</span></div>
+      <div style="padding:14px;border-radius:8px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.2)">
+        <div style="font-size:13px;font-weight:700;color:var(--emerald);margin-bottom:8px">Plan Mode의 효과</div>
+        <div style="font-size:13px;color:var(--text-muted);line-height:1.8">
+          <span style="color:var(--emerald)">✓</span> AI Agent의 추론 지점을 사전에 포착<br>
+          <span style="color:var(--emerald)">✓</span> 잘못된 방향 진행 전에 수정 가능<br>
+          <span style="color:var(--emerald)">✓</span> Sub Agent(Plan)가 코드베이스 분석 후 계획 제시<br>
+          <span style="color:var(--emerald)">✓</span> 계획 리뷰 → 수정 → 승인 → 실행
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">31 / 41</div>
+</div>
+
+
+<!-- ====== S10: 파일 저장 원칙 ====== -->
+<div class="slide">
+  <div class="slide-header"><div class="slide-num">심화 1장 — 사용상 주의점</div><div class="slide-title">결과물을 파일로 저장하고 갱신하라</div></div>
+  <div class="slide-summary">AI Agent는 기억을 물리적으로 보존하지 않음. <strong>세션이 끝나면 진행 결과가 사라짐</strong></div>
+  <div class="slide-body">
+    <div class="body-left">
+      <div class="section-label">왜 파일 저장이 중요한가</div>
+      <div class="desc-block"><p>대화에서 결정된 사항(설계 방향, API 스펙 등)은 세션의 컨텍스트 안에만 존재. 세션 종료 = 소실.</p></div>
+      <div class="section-label">실제 발생하는 문제</div>
+      <table class="mini-table">
+        <tr><th>상황</th><th>결과</th></tr>
+        <tr><td>실수로 세션 종료</td><td>2시간 논의 결과 소실</td></tr>
+        <tr><td>자동 압축 발동</td><td>초기 결정 사항 유실</td></tr>
+        <tr><td>다음 세션 시작</td><td>처음부터 다시 설명</td></tr>
+      </table>
+      <div class="callout"><strong>파일 저장 3원칙:</strong><br>① 즉시 저장 — 결정되면 바로 파일로<br>② 승인 후 적용 — 변경 전 확인<br>③ 경로 지정 — 저장 위치를 명시</div>
+    </div>
+    <div class="body-right">
+      <div class="section-label">저장 지시 예시</div>
+      <div class="code-example" style="margin-bottom:14px"><span class="prompt">></span> API 설계가 확정되었으니
+<span class="prompt">></span> <span class="highlight">./docs/api-design-v1.md</span>에 저장해줘.
+<span class="prompt">></span> 포함할 내용:
+<span class="prompt">></span>  - 확정된 엔드포인트 목록
+<span class="prompt">></span>  - 요청/응답 형식
+<span class="prompt">></span>  - 인증 방식
+<span class="prompt">></span>  - 미결 사항 (TODO)</div>
+      <div class="section-label">권장 파일 구조</div>
+      <div class="code-example"><span class="highlight">my-project/</span>
+├── docs/
+│   ├── design/        <span class="comment"># 설계 문서</span>
+│   ├── decisions/     <span class="comment"># 결정 기록</span>
+│   └── api/           <span class="comment"># API 스펙</span>
+├── reports/           <span class="comment"># 수행결과 보고서</span>
+└── todo/              <span class="comment"># 계획·TODO</span>
+    └── Plan_Draft_인증.md</div>
+    </div>
+  </div>
+  <div class="slide-footer">32 / 41</div>
+</div>
+
+
+<!-- ====== S9: 작업 시작/종료 ====== -->
+<div class="slide">
+  <div class="slide-header"><div class="slide-num">심화 1장 — 사용상 주의점</div><div class="slide-title">작업의 시작과 종료 — 컨텍스트 관리</div></div>
+  <div class="slide-summary">새 작업 시작 시 <strong>컨텍스트를 정리</strong>하고, 종료 시 <strong>결과를 보존·현행화</strong></div>
+  <div class="slide-body">
+    <div class="body-left">
+      <div class="section-label">작업 시작 시</div>
+      <div class="desc-block">
+        <ul style="list-style:none;padding:0">
+          <li style="padding-left:16px;position:relative;margin-bottom:6px;font-size:14px;color:var(--text-muted)"><span style="position:absolute;left:0;color:var(--accent);font-weight:700">›</span> 작업 개요와 AI Agent 역할 규정</li>
+          <li style="padding-left:16px;position:relative;margin-bottom:6px;font-size:14px;color:var(--text-muted)"><span style="position:absolute;left:0;color:var(--accent);font-weight:700">›</span> 불필요한 컨텍스트 제거 (/clear, /compact)</li>
+          <li style="padding-left:16px;position:relative;margin-bottom:6px;font-size:14px;color:var(--text-muted)"><span style="position:absolute;left:0;color:var(--accent);font-weight:700">›</span> 이전 작업 이어갈 경우: 산출물 파일 기반 복원</li>
+          <li style="padding-left:16px;position:relative;margin-bottom:6px;font-size:14px;color:var(--text-muted)"><span style="position:absolute;left:0;color:var(--accent);font-weight:700">›</span> 남길/제거할 컨텍스트를 직접 지시</li>
+        </ul>
+      </div>
+      <div class="section-label">작업 종료 시</div>
+      <div class="desc-block">
+        <ul style="list-style:none;padding:0">
+          <li style="padding-left:16px;position:relative;margin-bottom:6px;font-size:14px;color:var(--text-muted)"><span style="position:absolute;left:0;color:var(--emerald);font-weight:700">›</span> 결과물을 파일로 보존 (코드 커밋, 문서 저장)</li>
+          <li style="padding-left:16px;position:relative;margin-bottom:6px;font-size:14px;color:var(--text-muted)"><span style="position:absolute;left:0;color:var(--emerald);font-weight:700">›</span> 참조 자료 현행화 (새 세션에서 변경 전 자료로 작업 방지)</li>
+          <li style="padding-left:16px;position:relative;margin-bottom:6px;font-size:14px;color:var(--text-muted)"><span style="position:absolute;left:0;color:var(--emerald);font-weight:700">›</span> TODO를 명시적으로 기록</li>
+        </ul>
+      </div>
+    </div>
+    <div class="body-right">
+      <div class="section-label">시작/종료 체크리스트</div>
+      <div class="code-example"><span class="comment">[작업 시작]</span>
+□ 작업 목표와 AI Agent 역할을 명시했는가?
+□ 이전 산출물을 참조 지시했는가?
+□ /clear 또는 /compact로 정리했는가?
+□ 산출물 저장 경로를 지정했는가?
+
+<span class="comment">[작업 종료]</span>
+□ 결과물이 파일로 보존되었는가?
+□ 참조 자료가 현행화되었는가?
+□ TODO가 기록되었는가?</div>
+      <div class="section-label" style="margin-top:14px">시작 지시 템플릿</div>
+      <div class="code-example"><span class="prompt">></span> <span class="highlight">[작업 개요]</span> Refresh Token 구현
+<span class="prompt">></span> <span class="highlight">[역할]</span> 백엔드 시니어 개발자
+<span class="prompt">></span> <span class="highlight">[참조]</span> docs/auth-design.md
+<span class="prompt">></span> <span class="highlight">[산출물]</span> ./reports/ 에 저장
+<span class="prompt">></span> <span class="highlight">[규칙]</span> 변경 전 승인 요청</div>
+    </div>
+  </div>
+  <div class="slide-footer">33 / 41</div>
+</div>
+
+
+<!-- ====== S10: 컨텍스트가 품질 결정 ====== -->
+<div class="slide">
+  <div class="slide-header"><div class="slide-num">심화 2장 — 컨텍스트 관리</div><div class="slide-title">결과 품질은 컨텍스트의 질이 결정한다</div></div>
+  <div class="slide-summary">같은 지시, 다른 결과 — 원인은 AI Agent 능력이 아니라 <strong>세션마다 달라지는 컨텍스트</strong></div>
+  <div class="slide-body">
+    <div class="body-left">
+      <div class="section-label">임의 탐색 문제</div>
+      <div class="code-example" style="margin-bottom:14px"><span class="prompt">></span> "인증 API를 구현해줘"
+
+<span class="comment">[세션 A — 탐색이 좋았던 경우]</span>
+  → src/auth/ 먼저 읽음
+  → 기존 패턴 발견
+  → <span class="success">일관된 코드 생성</span>
+
+<span class="comment">[세션 B — 탐색이 빗나간 경우]</span>
+  → src/users/ 먼저 읽음
+  → 무관한 코드 로드
+  → <span class="danger">의도와 다른 결과</span></div>
+      <div class="section-label">컨텍스트 상태별 품질</div>
+      <table class="mini-table">
+        <tr><th>상태</th><th>품질</th></tr>
+        <tr><td>관련 파일 정확히 로드</td><td style="color:var(--emerald)">높음</td></tr>
+        <tr><td>무관한 파일 대량 로드</td><td style="color:var(--amber)">불안정</td></tr>
+        <tr><td>대화 길어져 지침 밀림</td><td style="color:var(--accent-soft)">점진 하락</td></tr>
+        <tr><td>이전 실패가 쌓임</td><td style="color:#FB7185">악순환</td></tr>
+      </table>
+    </div>
+    <div class="body-right">
+      <div class="section-label">컨텍스트 윈도우 구조</div>
+      <svg viewBox="0 0 440 380" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:440px">
+        <rect x="20" y="10" width="400" height="300" rx="10" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.1)"/>
+        <text x="220" y="36" text-anchor="middle" fill="#64748B" font-size="12" font-weight="700" font-family="Pretendard,-apple-system,BlinkMacSystemFont,sans-serif">컨텍스트 윈도우 (200K 토큰)</text>
+        <rect x="40" y="50" width="360" height="28" rx="4" fill="rgba(100,116,139,0.15)"/><text x="220" y="68" text-anchor="middle" fill="#94A3B8" font-size="11" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">시스템 프롬프트 + 도구 설명 (고정)</text>
+        <rect x="40" y="82" width="360" height="28" rx="4" fill="rgba(255,102,0,0.12)"/><text x="220" y="100" text-anchor="middle" fill="#FF8833" font-size="11" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">CLAUDE.md 지침</text>
+        <rect x="40" y="114" width="360" height="28" rx="4" fill="rgba(13,148,136,0.12)"/><text x="220" y="132" text-anchor="middle" fill="#14B8A6" font-size="11" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">MCP 도구 설명</text>
+        <line x1="40" y1="150" x2="400" y2="150" stroke="rgba(255,255,255,0.15)" stroke-dasharray="4,3"/>
+        <rect x="40" y="158" width="360" height="36" rx="4" fill="rgba(59,130,246,0.1)"/><text x="220" y="180" text-anchor="middle" fill="#60A5FA" font-size="11" font-weight="600" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">AI Agent가 읽은 파일들 (기초 탐색 결과)</text>
+        <rect x="40" y="198" width="360" height="36" rx="4" fill="rgba(167,139,250,0.1)"/><text x="220" y="220" text-anchor="middle" fill="#C4B5FD" font-size="11" font-weight="600" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">이전 대화 내용 (쌓일수록 증가)</text>
+        <rect x="40" y="238" width="360" height="28" rx="4" fill="rgba(245,158,11,0.1)"/><text x="220" y="256" text-anchor="middle" fill="#F59E0B" font-size="11" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">도구 실행 결과</text>
+        <text x="220" y="290" text-anchor="middle" fill="#475569" font-size="11" font-weight="600" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">▼ 이 전체 맥락을 기반으로 다음 지시를 해석·실행 ▼</text>
+        <rect x="60" y="330" width="320" height="36" rx="6" fill="rgba(255,102,0,0.06)" stroke="rgba(255,102,0,0.2)"/>
+        <text x="220" y="352" text-anchor="middle" fill="var(--accent-soft)" font-size="12" font-weight="600" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">어떤 내용이 얼마나 비중을 차지하느냐 = 판단 방향</text>
+      </svg>
+    </div>
+  </div>
+  <div class="slide-footer">34 / 41</div>
+</div>
+
+
+<!-- ====== S11: 판단 범위 좁히기 ====== -->
+<div class="slide">
+  <div class="slide-header"><div class="slide-num">심화 2장 — 컨텍스트 관리</div><div class="slide-title">AI Agent의 판단 범위를 좁혀라</div></div>
+  <div class="slide-summary">"무엇을 할지"(심화1장)뿐 아니라 <strong>"어떻게 수행할지를 판단하는 부분"</strong>의 범위도 좁혀야 함</div>
+  <div class="slide-body">
+    <div class="body-left">
+      <div class="section-label">AI Agent의 2단계 판단</div>
+      <div class="code-example" style="margin-bottom:14px"><span class="prompt">></span> 사용자 인증 API를 구현해줘
+
+<span class="keyword">판단 1: "무엇을?"</span> (What)
+  → 사용자 지시에서 파악
+
+<span class="highlight">판단 2: "어떻게 수행?"</span> (How to execute)
+  → 어떤 파일을 먼저 읽을까?
+  → 기존 코드 패턴이 있는지?
+  → 어떤 라이브러리를 참고?
+  → <span class="danger">← 이 부분이 임의 탐색 영역</span></div>
+      <div class="desc-block"><p>심화 1장 = <strong>판단 1</strong>을 좁히는 것<br>심화 2장 = <strong>판단 2</strong>를 좁히는 것</p></div>
+    </div>
+    <div class="body-right">
+      <div class="section-label">판단 2를 좁히는 4가지 방법</div>
+      <table class="mini-table">
+        <tr><th>방법</th><th>설명</th><th>예시</th></tr>
+        <tr><td style="color:var(--accent-soft)">역할 명시</td><td>수행할 역할 규정</td><td>"시니어 백엔드 개발자로서"</td></tr>
+        <tr><td style="color:var(--blue-soft)">참조 파일 지정</td><td>탐색 대상 직접 지정</td><td>"src/auth/ 패턴을 따라서"</td></tr>
+        <tr><td style="color:var(--teal-soft)">수행 절차 명시</td><td>실행 순서 규정</td><td>"1)스키마→2)서비스→3)테스트"</td></tr>
+        <tr><td style="color:var(--emerald)">판단 기준 제공</td><td>애매할 때의 원칙</td><td>"확신 없으면 질문해줘"</td></tr>
+      </table>
+      <div class="callout" style="margin-top:14px"><strong>하지만</strong> 사람이 매번 모든 참조 파일, 수행 절차, 판단 기준을 지시에 포함시킬 수는 없음<br><br>→ <strong>구조적 해결:</strong> 산출물 인덱스 + 작업 유형별 참조 가이드</div>
+    </div>
+  </div>
+  <div class="slide-footer">35 / 41</div>
+</div>
+
+
+<!-- ====== S12: 산출물 인덱스 ====== -->
+<div class="slide">
+  <div class="slide-header"><div class="slide-num">심화 2장 — 컨텍스트 관리</div><div class="slide-title">산출물 인덱스 — 프로젝트의 지도</div></div>
+  <div class="slide-summary">AI Agent가 "어떤 파일을 먼저 읽을지" 판단할 때 <strong>지도 역할</strong>. 임의 탐색 → 목적 지향적 탐색</div>
+  <div class="slide-body">
+    <div class="body-left">
+      <div class="section-label">인덱스가 없을 때 vs 있을 때</div>
+      <div style="display:flex;gap:12px;margin-bottom:14px">
+        <div style="flex:1;padding:12px;border-radius:8px;border:1px solid rgba(244,63,94,0.2);background:rgba(244,63,94,0.05)"><div style="font-size:12px;font-weight:700;color:#FB7185;font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;margin-bottom:4px">인덱스 없음</div><div style="font-size:12px;color:var(--text-muted);line-height:1.5">100개 파일 탐색<br>컨텍스트 50% 소모<br>작업 공간 부족</div></div>
+        <div style="flex:1;padding:12px;border-radius:8px;border:1px solid rgba(16,185,129,0.2);background:rgba(16,185,129,0.05)"><div style="font-size:12px;font-weight:700;color:var(--emerald);font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;margin-bottom:4px">인덱스 있음</div><div style="font-size:12px;color:var(--text-muted);line-height:1.5">3개 파일만 읽음<br>컨텍스트 5% 소모<br>작업 공간 충분</div></div>
+      </div>
+      <div class="section-label">핵심 원칙</div>
+      <table class="mini-table">
+        <tr><th>원칙</th><th>설명</th></tr>
+        <tr><td>진입점 명시</td><td>"이 파일부터 읽어라"를 지정</td></tr>
+        <tr><td>용도별 분류</td><td>"이 작업 시 이것을 참고"로 연결</td></tr>
+        <tr><td>가볍게 유지</td><td>50~100줄 이내</td></tr>
+        <tr><td>현행화</td><td>구조 변경 시 인덱스도 갱신</td></tr>
+      </table>
+    </div>
+    <div class="body-right">
+      <div class="section-label">PROJECT_INDEX.md 예시</div>
+      <div class="code-example"><span class="highlight"># PROJECT_INDEX</span>
+
+<span class="keyword">## 핵심 디렉토리</span>
+| 디렉토리       | 진입 파일              |
+|---------------|----------------------|
+| src/api/      | src/api/README.md    |
+| src/auth/     | auth.module.ts       |
+| src/services/ | services/README.md   |
+| prisma/       | schema.prisma        |
+| docs/         | docs/README.md       |
+
+<span class="keyword">## 핵심 설계 문서</span>
+| 문서                    | 참고 시점      |
+|------------------------|--------------|
+| docs/api-convention.md | API 구현 시    |
+| docs/auth-design.md    | 인증 작업 시   |
+| docs/db-schema.md      | DB 변경 시    |
+
+<span class="keyword">## 기술 스택</span>
+NestJS 11 + React 18 + TypeScript
+PostgreSQL + Prisma + Jest</div>
+    </div>
+  </div>
+  <div class="slide-footer">36 / 41</div>
+</div>
+
+
+<!-- ====== S13: 작업 유형별 참조 가이드 ====== -->
+<div class="slide">
+  <div class="slide-header"><div class="slide-num">심화 2장 — 컨텍스트 관리</div><div class="slide-title">작업 유형별 참조 가이드</div></div>
+  <div class="slide-summary">인덱스 = 프로젝트의 지도. 참조 가이드 = <strong>"이 작업에는 이 지도의 이 부분을 봐라"</strong></div>
+  <div class="slide-body">
+    <div class="body-left">
+      <div class="section-label">CLAUDE.md에 작성</div>
+      <div class="code-example"><span class="keyword">## 작업 유형별 참조 가이드</span>
+
+<span class="highlight">### API 신규 구현 시</span>
+1. docs/api-convention.md
+2. src/api/ 내 유사 API 파일
+3. prisma/schema.prisma
+4. tests/ 내 유사 테스트
+
+<span class="highlight">### API 수정·버그 수정 시</span>
+1. 해당 API + 관련 서비스 파일
+2. tests/ 내 해당 테스트
+3. npm test로 회귀 확인
+
+<span class="highlight">### DB 스키마 변경 시</span>
+1. docs/db-schema.md
+2. prisma/schema.prisma 수정
+3. 마이그레이션 + 인덱스 현행화
+
+<span class="highlight">### 인증 관련 작업 시</span>
+1. docs/auth-design.md
+2. src/auth/
+3. 인증 테스트 전체 실행</div>
+    </div>
+    <div class="body-right">
+      <div class="section-label">효과</div>
+      <div style="display:flex;gap:12px;margin-bottom:16px">
+        <div style="flex:1;padding:12px;border-radius:8px;border:1px solid rgba(244,63,94,0.2);background:rgba(244,63,94,0.05)"><div style="font-size:12px;font-weight:700;color:#FB7185;font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;margin-bottom:4px">가이드 없음</div><div style="font-size:12px;color:var(--text-muted);line-height:1.5">"결제 API 구현해줘"<br>→ 어디부터 볼지 몰라 전체 탐색<br>→ 토큰 낭비 + 잘못된 참조</div></div>
+        <div style="flex:1;padding:12px;border-radius:8px;border:1px solid rgba(16,185,129,0.2);background:rgba(16,185,129,0.05)"><div style="font-size:12px;font-weight:700;color:var(--emerald);font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;margin-bottom:4px">가이드 있음</div><div style="font-size:12px;color:var(--text-muted);line-height:1.5">"결제 API 구현해줘"<br>→ "API 신규 구현 시" 참조<br>→ 목적 지향적 · 일관된 품질</div></div>
+      </div>
+      <div class="section-label">탐색 경로</div>
+      <svg viewBox="0 0 440 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:440px">
+        <rect x="10" y="10" width="130" height="44" rx="6" fill="rgba(255,102,0,0.1)" stroke="rgba(255,102,0,0.25)"/><text x="75" y="28" text-anchor="middle" fill="#FF8833" font-size="11" font-weight="600" font-family="Pretendard,-apple-system,BlinkMacSystemFont,sans-serif">CLAUDE.md</text><text x="75" y="44" text-anchor="middle" fill="#64748B" font-size="10" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">참조 가이드</text>
+        <line x1="140" y1="32" x2="160" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#ah2)"/>
+        <rect x="160" y="10" width="130" height="44" rx="6" fill="rgba(59,130,246,0.1)" stroke="rgba(59,130,246,0.25)"/><text x="225" y="28" text-anchor="middle" fill="#60A5FA" font-size="11" font-weight="600" font-family="Pretendard,-apple-system,BlinkMacSystemFont,sans-serif">INDEX.md</text><text x="225" y="44" text-anchor="middle" fill="#64748B" font-size="10" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">진입점 확인</text>
+        <line x1="290" y1="32" x2="310" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#ah2)"/>
+        <rect x="310" y="10" width="120" height="44" rx="6" fill="rgba(16,185,129,0.1)" stroke="rgba(16,185,129,0.25)"/><text x="370" y="28" text-anchor="middle" fill="#10B981" font-size="11" font-weight="600" font-family="Pretendard,-apple-system,BlinkMacSystemFont,sans-serif">실제 파일</text><text x="370" y="44" text-anchor="middle" fill="#64748B" font-size="10" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">최소 로드</text>
+        <rect x="30" y="80" width="380" height="50" rx="8" fill="rgba(16,185,129,0.06)" stroke="rgba(16,185,129,0.2)"/>
+        <text x="220" y="100" text-anchor="middle" fill="var(--emerald)" font-size="12" font-weight="600" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">임의 탐색 ↓ · 토큰 낭비 ↓ · 품질 편차 ↓</text>
+        <text x="220" y="118" text-anchor="middle" fill="#94A3B8" font-size="11" font-family="Pretendard,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">사람이 매번 참조 파일 지정 안 해도 됨 → 지시가 간결해짐</text>
+      </svg>
+    </div>
+  </div>
+  <div class="slide-footer">37 / 41</div>
+</div>
+
+
+<!-- ====== S16: 실전 적용 체크리스트 ====== -->
+<div class="slide">
+  <div class="slide-header"><div class="slide-num">심화 2장 — 컨텍스트 관리</div><div class="slide-title">실전 적용 체크리스트</div></div>
+  <div class="slide-summary">프로젝트 셋업 · 작업 지시 · 작업 종료 — <strong>3가지 시점별 확인 항목</strong></div>
+  <div class="slide-body">
+    <div class="body-left">
+      <div class="section-label">프로젝트 셋업 시</div>
+      <div class="code-example" style="margin-bottom:14px;font-size:12px"><span class="success">□</span> PROJECT_INDEX.md를 작성했는가?
+  - 핵심 디렉토리 + 진입 파일 명시
+  - 핵심 설계 문서 목록 포함
+<span class="success">□</span> CLAUDE.md에 작업 유형별 참조 가이드?
+  - 자주 수행하는 작업 유형 커버
+  - 유형별 참조 파일 + 순서 명시
+<span class="success">□</span> "새 작업 시 PROJECT_INDEX.md를
+    먼저 읽어라"가 CLAUDE.md에 있는가?</div>
+      <div class="section-label">작업 지시 시</div>
+      <div class="code-example" style="font-size:12px"><span class="keyword">□</span> 해당 작업 유형의 참조 가이드가 있는가?
+  <span class="success">있다면:</span> 별도 참조 지시 없이 OK
+  <span class="danger">없다면:</span> 참조 파일을 지시에 직접 포함
+<span class="keyword">□</span> 새 유형이면 완료 후 가이드에 추가?</div>
+    </div>
+    <div class="body-right">
+      <div class="section-label">작업 종료 시</div>
+      <div class="code-example" style="margin-bottom:14px;font-size:12px"><span class="highlight">□</span> 파일 구조 변경 → INDEX.md 현행화?
+<span class="highlight">□</span> 새 설계 문서 추가 → 인덱스 반영?
+<span class="highlight">□</span> 새 작업 유형 → 참조 가이드 추가?</div>
+      <div class="section-label">체크리스트의 효과</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="padding:12px 16px;border-radius:8px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.2)">
+          <div style="font-size:13px;color:var(--text-muted);line-height:1.6"><span style="color:var(--emerald);font-weight:700">셋업 시 체크</span> → AI Agent가 올바른 파일을 찾는 구조 확보</div>
+        </div>
+        <div style="padding:12px 16px;border-radius:8px;background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.2)">
+          <div style="font-size:13px;color:var(--text-muted);line-height:1.6"><span style="color:var(--blue-soft);font-weight:700">지시 시 체크</span> → 매번 참조 파일 나열 안 해도 됨</div>
+        </div>
+        <div style="padding:12px 16px;border-radius:8px;background:rgba(255,102,0,0.06);border:1px solid rgba(255,102,0,0.2)">
+          <div style="font-size:13px;color:var(--text-muted);line-height:1.6"><span style="color:var(--accent-soft);font-weight:700">종료 시 체크</span> → 다음 세션에서도 동일 품질 유지</div>
+        </div>
+      </div>
+      <div class="callout" style="margin-top:14px"><strong>핵심:</strong> 이 체크리스트가 습관이 되면 인덱스와 가이드가 자동으로 현행화되어 프로젝트 전체의 AI Agent 활용 품질이 올라감</div>
+    </div>
+  </div>
+  <div class="slide-footer">38 / 41</div>
+</div>
+
+
+<!-- ====== S17: 컨텍스트 격리 도입 ====== -->
+<div class="slide">
+  <div class="slide-header"><div class="slide-num">심화 2장 — 컨텍스트 격리</div><div class="slide-title">개발자에게 테스트를 맡기지 말라</div></div>
+  <div class="slide-summary">"자기가 만든 코드를 자기가 테스트하면 안 된다" — <strong>AI Agent도 이 문제에서 자유롭지 않다</strong></div>
+  <div class="slide-body">
+    <div class="body-left">
+      <div class="section-label">왜 문제인가</div>
+      <div class="desc-block"><p>자신이 어디를 어떻게 개발했는지 알기 때문에, "당연히 되겠지", "이 경로는 문제없을 거야"라고 넘어감. 엣지 케이스를 확인하지 않고 정상 경로만 검증.</p></div>
+      <div class="section-label">동일 세션에서 구현+검증 시</div>
+      <div class="code-example" style="font-size:12px"><span class="comment">[구현 세션의 컨텍스트]</span>
+├── 설계 판단 (이미 알고 있음)
+├── 수정 파일 (이미 알고 있음)
+├── 해결 방향 (이미 알고 있음)
+└── 기술 부채 (합리화 가능)
+
+<span class="comment">[검증 시 발생하는 문제]</span>
+· <span class="danger">"내가 이렇게 했으니 당연히 동작"</span> → 스킵
+· <span class="danger">"3회 재시도로 설계했으니 맞다"</span> → 의심 안함
+· <span class="danger">추론 결정을 결함으로 인식 못함</span></div>
+    </div>
+    <div class="body-right">
+      <div class="section-label">동일 세션 vs 새 세션</div>
+      <div style="display:flex;gap:12px;margin-bottom:16px">
+        <div style="flex:1;padding:14px;border-radius:8px;border:1px solid rgba(244,63,94,0.2);background:rgba(244,63,94,0.05)"><div style="font-size:12px;font-weight:700;color:#FB7185;font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;margin-bottom:6px">동일 세션 검증</div><div style="font-size:12px;color:var(--text-muted);line-height:1.5">구현 맥락이 남아 있음<br>"아는 것이 독"<br>편향된 검증</div></div>
+        <div style="flex:1;padding:14px;border-radius:8px;border:1px solid rgba(16,185,129,0.2);background:rgba(16,185,129,0.05)"><div style="font-size:12px;font-weight:700;color:var(--emerald);font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;margin-bottom:6px">새 세션 검증</div><div style="font-size:12px;color:var(--text-muted);line-height:1.5">구현 맥락 없음<br>결과물만 보고 판단<br>객관적 검증</div></div>
+      </div>
+      <div style="padding:16px;border-radius:10px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.2)">
+        <div style="font-size:13px;font-weight:700;color:var(--emerald);margin-bottom:8px">격리의 3원칙</div>
+        <div style="font-size:13px;color:var(--text-muted);line-height:1.8">
+          <span style="color:var(--emerald)">①</span> 구현한 세션에서 검증하지 않는다<br>
+          <span style="color:var(--emerald)">②</span> 검증은 구현결과 리포트만 참조<br>
+          <span style="color:var(--emerald)">③</span> 백그라운드/별도 프로세스 활용
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">39 / 41</div>
+</div>
+
+
+<!-- ====== S15: 격리 실전 방법 ====== -->
+<div class="slide">
+  <div class="slide-header"><div class="slide-num">심화 2장 — 컨텍스트 격리</div><div class="slide-title">검증 세션 분리 — 실전 방법</div></div>
+  <div class="slide-summary">구현 세션에서 리포트 저장 → 새 세션에서 리포트 참조 검증. <strong>백그라운드 실행으로 자동 격리</strong></div>
+  <div class="slide-body">
+    <div class="body-left">
+      <div class="section-label">Step 1. 구현 세션에서 리포트 저장</div>
+      <div class="code-example" style="margin-bottom:14px"><span class="prompt">></span> 구현 완료 후 리포트를
+<span class="prompt">></span> <span class="highlight">./reports/auth-impl-report.md</span>에 저장
+<span class="prompt">></span>
+<span class="prompt">></span> 포함:
+<span class="prompt">></span>  - 구현 범위 (무엇을 했는가)
+<span class="prompt">></span>  - 변경된 파일 목록
+<span class="prompt">></span>  - 주요 설계 판단과 이유
+<span class="prompt">></span>  - 테스트 결과
+<span class="prompt">></span>  - 미해결 이슈
+<span class="prompt">></span>  - <span class="highlight">검증 시 확인할 항목</span></div>
+      <div class="section-label">Step 2. 새 세션에서 검증</div>
+      <div class="code-example"><span class="prompt">></span> ./reports/auth-impl-report.md를 읽고
+<span class="prompt">></span> 해당 구현을 검증해줘.
+<span class="prompt">></span> - 요구사항과 일치하는지
+<span class="prompt">></span> - 코드 품질, 보안, 성능
+<span class="prompt">></span> - 리뷰 결과를
+<span class="prompt">></span>   <span class="highlight">./reports/auth-review.md</span>에 저장</div>
+    </div>
+    <div class="body-right">
+      <div class="section-label">유용한 팁: 백그라운드 실행</div>
+      <div class="code-example" style="margin-bottom:14px"><span class="prompt">></span> 구현이 완료되었어.
+<span class="prompt">></span> 아래 검증을 <span class="highlight">백그라운드에서</span> 실행해줘.
+<span class="prompt">></span>
+<span class="prompt">></span> 백그라운드 작업:
+<span class="prompt">></span>  1. impl-report.md 참조 검증
+<span class="prompt">></span>  2. npm test → test-output.log
+<span class="prompt">></span>  3. 검증 리포트 저장
+<span class="prompt">></span>
+<span class="prompt">></span> 나는 이 세션에서 다른 작업 진행할게.</div>
+      <div class="section-label">백그라운드 실행 장점</div>
+      <table class="mini-table">
+        <tr><th>장점</th><th>설명</th></tr>
+        <tr><td style="color:var(--emerald)">컨텍스트 격리</td><td>새 세션에서 실행 → 구현 편향 없음</td></tr>
+        <tr><td style="color:var(--blue-soft)">시간 절약</td><td>검증 기다리지 않고 다음 작업</td></tr>
+        <tr><td style="color:var(--accent-soft)">병렬 작업</td><td>구현 + 검증 동시 수행</td></tr>
+        <tr><td style="color:var(--teal-soft)">객관성</td><td>구현자 편향 차단</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="slide-footer">40 / 41</div>
+</div>
+
+
+<!-- ====== S16: 심화편 전체 요약 ====== -->
+<div class="slide">
+  <div class="slide-header"><div class="slide-num">심화편 요약</div><div class="slide-title">심화편 전체 정리</div></div>
+  <div class="slide-summary">구조적 한계를 이해하고 → 지시 품질을 높이고 → 컨텍스트를 관리하고 → <strong>검증은 격리</strong></div>
+  <div class="slide-body">
+    <div class="body-left">
+      <div class="section-label">한계 → 대응 매핑</div>
+      <table class="mini-table">
+        <tr><th>한계</th><th>대응</th></tr>
+        <tr><td style="color:var(--blue-soft)">① 자기 판단 실행</td><td>명확한 지시 7요소 (Why부터)</td></tr>
+        <tr><td style="color:var(--accent-soft)">② 지침 무시</td><td>컨텍스트 관리 (/compact, /clear)</td></tr>
+        <tr><td style="color:#FB7185">③ 악순환</td><td>단계별 지시 + 파일 보존 + git commit</td></tr>
+        <tr><td style="color:var(--amber)">④ 숨은 추론</td><td>산출물 인덱스 + 참조 가이드 + Plan Mode</td></tr>
+        <tr><td style="color:var(--purple-soft)">+ 검증 편향</td><td>컨텍스트 격리 (새 세션 / 백그라운드)</td></tr>
+      </table>
+      <div class="callout" style="margin-top:14px"><strong>핵심 원칙:</strong> AI Agent가 스스로 판단하는 영역을 최소화하고, 판단이 필요한 부분은 사람이 명시적으로 결정한다</div>
+    </div>
+    <div class="body-right">
+      <div class="section-label">심화편 구성</div>
+      <div class="limit-card" style="background:rgba(244,63,94,0.04);border-color:rgba(244,63,94,0.15)"><div class="num" style="color:#FB7185">도입</div><div class="title">AI Agent의 4가지 구조적 한계</div><div class="desc">자기 판단 · 지침 무시 · 악순환 · 숨은 추론</div></div>
+      <div class="limit-card" style="background:rgba(255,102,0,0.04);border-color:rgba(255,102,0,0.15)"><div class="num" style="color:var(--accent-soft)">1장</div><div class="title">AI Agent 사용상 주의점</div><div class="desc">7요소 지시 · 파일 저장 3원칙 · 작업 시작/종료 절차</div></div>
+      <div class="limit-card" style="background:rgba(13,148,136,0.04);border-color:rgba(13,148,136,0.15)"><div class="num" style="color:var(--teal-soft)">2장</div><div class="title">컨텍스트 관리와 토큰 최적화</div><div class="desc">판단 범위 축소 · 산출물 인덱스 · 참조 가이드 · 컨텍스트 격리</div></div>
+      <div style="margin-top:16px;padding:14px;border-radius:8px;background:rgba(255,255,255,0.03);border:1px solid var(--border);text-align:center">
+        <div style="font-size:13px;color:var(--text-dim)">다음 → 심화 3장: 구조화된 지침 설계<br>(전역 · 프로젝트별 · 개인별 지침 체계)</div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">41 / 41</div>
+</div>
+
+</div>
+</body>
+</html>
