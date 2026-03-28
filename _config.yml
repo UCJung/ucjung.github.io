@@ -95,6 +95,15 @@ collections:
     output: true
     sort_by: order
 
+jekyll-archives:
+  enabled: [categories, tags]
+  layouts:
+    category: category
+    tag: tag
+  permalinks:
+    tag: /tags/:name/
+    category: /categories/:name/
+
 exclude:
   - "*.gem"
   - "*.gemspec"
