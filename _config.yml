@@ -28,7 +28,7 @@ webmaster_verifications:
   google: ""
 
 theme_mode: ""
-avatar: "/assets/img/avatar.jpg"
+avatar: "/assets/img/profile.svg"
 toc: true
 cdn: ""
 
