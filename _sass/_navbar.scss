@@ -56,7 +56,8 @@
   }
 
   .navbar-brand {
-    color: var(--global-text-color);
+    color: var(--global-theme-color) !important;
+    font-weight: 600 !important;
   }
 
   .navbar-nav .nav-item .nav-link {
