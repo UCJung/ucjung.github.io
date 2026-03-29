@@ -19,9 +19,9 @@ function determineGiscusTheme() {
   let giscusAttributes = {
     src: "https://giscus.app/client.js",
     "data-repo": "UCJung/ucjung.github.io",
-    "data-repo-id": "",
+    "data-repo-id": "R_kgDORzIweA",
     "data-category": "Announcements",
-    "data-category-id": "",
+    "data-category-id": "DIC_kwDORzIweM4C5grs",
     "data-mapping": "title",
     "data-strict": "1",
     "data-reactions-enabled": "1",
