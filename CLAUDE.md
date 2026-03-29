@@ -16,12 +16,11 @@ bundle exec jekyll serve --port 24000 --livereload
 
 사용자가 "배포해줘"라고 하면 아래 순서대로 수행:
 
-1. 변경된 파일 `git add`
-2. 커밋 메시지 작성 후 `git commit` (Co-Authored-By: Claude Code 포함)
-3. `git push origin main`
-4. `git checkout dev && git merge main && git push origin dev && git checkout main`
-5. `_devlog/YYYY-MM-DD.md` 작업로그 작성 (없으면 신규 생성, 있으면 항목 추가)
-6. 작업로그 커밋 및 push + dev merge
+1. `_devlog/YYYY-MM-DD.md` 작업로그 작성 (없으면 신규 생성, 있으면 항목 추가)
+2. 변경된 파일 + 작업로그 `git add`
+3. 커밋 메시지 작성 후 `git commit` (Co-Authored-By: Claude Code 포함)
+4. `git push origin main`
+5. `git checkout dev && git merge main && git push origin dev && git checkout main`
 
 ## 작업로그 기록 지침
 
