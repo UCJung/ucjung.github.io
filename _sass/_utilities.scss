@@ -26,7 +26,7 @@ pre {
   color: var(--global-theme-color);
   background-color: var(--global-code-bg-color);
   border-radius: 6px;
-  padding: 6px 12px;
+  padding: 18px 24px;
   font-family: "KoPubWorldDotum", "Pretendard Variable", monospace;
 
   // Responsive behavior for code blocks
@@ -57,10 +57,14 @@ code {
   word-wrap: break-word;
 }
 
-// Dark mode: code text white
+// Dark mode: code text white + dark background
 html[data-theme="dark"] {
   pre, code {
-    color: #FFFFFF;
+    color: #b8cfe5;
+  }
+  .highlight pre,
+  figure.highlight pre {
+    background-color: #010208 !important;
   }
 }
 
