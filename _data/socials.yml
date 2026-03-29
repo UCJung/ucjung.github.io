@@ -1,4 +1,7 @@
 email: mykumi@gmail.com
 github_username: UCJung
-devto_username: ucjung
 rss_icon: true
+custom_social:
+  logo: https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/devdotto.svg
+  title: DEV.to
+  url: https://dev.to/ucjung

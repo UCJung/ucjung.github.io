@@ -117,6 +117,10 @@
               {% endif %}
             {% endif %}
           {% endfor %}
+          <!-- Admin -->
+          <li class="nav-item">
+            <a class="nav-link" href="{{ '/admin/' | relative_url }}" target="_blank">admin</a>
+          </li>
           {% if site.search_enabled %}
             <!-- Search -->
             <li class="nav-item">
