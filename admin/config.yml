@@ -2,8 +2,6 @@ backend:
   name: github
   repo: UCJung/ucjung.github.io
   branch: main
-  auth_type: pkce
-  app_id: "Ov23liKFaGaIA8oVXx7I"
 
 media_folder: "assets/img"
 public_folder: "/assets/img"
