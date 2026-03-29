@@ -6,7 +6,7 @@
 
 html,
 body {
-  font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: "Pretendard Variable", "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 p,
@@ -24,12 +24,12 @@ strong {
   color: var(--global-text-color);
 }
 
-h1 { font-weight: 750; }
-h2 { font-weight: 700; }
-h3 { font-weight: 650; }
-h4 { font-weight: 600; }
-h5 { font-weight: 550; }
-h6 { font-weight: 500; }
+body h1 { font-weight: 750 !important; }
+body h2 { font-weight: 700 !important; }
+body h3 { font-weight: 650 !important; }
+body h4 { font-weight: 600 !important; }
+body h5 { font-weight: 550 !important; }
+body h6 { font-weight: 500 !important; }
 
 hr {
   border-top: 1px solid var(--global-divider-color);
