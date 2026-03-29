@@ -2,7 +2,7 @@ backend:
   name: github
   repo: UCJung/ucjung.github.io
   branch: main
-  base_url: https://sveltia-cms-auth.netlify.app
+  base_url: https://ucjung.github.io
 
 media_folder: "assets/img"
 public_folder: "/assets/img"
