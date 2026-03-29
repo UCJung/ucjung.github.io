@@ -34,6 +34,9 @@
 }
 
 .post-title {
+  color: var(--global-theme-color) !important;
+  font-weight: 800 !important;
+
   mjx-container[jax="CHTML"][display="true"] {
     display: unset;
   }
