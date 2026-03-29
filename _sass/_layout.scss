@@ -56,3 +56,82 @@ body.sticky-bottom-footer {
 *****************************************************************************/
 
 // TODO: redefine projects layout.
+
+/******************************************************************************
+ * TOC Sidebar Toggle
+ ******************************************************************************/
+
+.toc-title-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--global-divider-color);
+  margin-bottom: 8px;
+}
+
+.toc-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--global-theme-color);
+  letter-spacing: 0.5px;
+}
+
+#toc-toggle {
+  background: none;
+  border: 1px solid var(--global-divider-color);
+  border-radius: 4px;
+  color: var(--global-text-color-light);
+  font-size: 0.8rem;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+
+  &:hover {
+    color: var(--global-theme-color);
+    border-color: var(--global-theme-color);
+  }
+}
+
+#toc-row {
+  flex-wrap: nowrap;
+}
+
+#toc-col {
+  width: 25%;
+  flex-shrink: 0;
+  transition: width 0.3s ease;
+
+  .toc-header {
+    position: sticky;
+    top: 70px;
+    max-height: calc(100vh - 80px);
+    overflow-y: auto;
+  }
+}
+
+#toc-col.collapsed {
+  width: 55px;
+
+  #toc-sidebar {
+    display: none;
+  }
+  .toc-label {
+    display: none;
+  }
+  .toc-title-bar {
+    border-bottom: none;
+    padding: 8px 4px;
+    justify-content: center;
+  }
+}
+
+#toc-content {
+  flex: 1;
+  min-width: 0;
+  transition: width 0.3s ease;
+}

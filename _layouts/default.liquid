@@ -23,25 +23,31 @@
     <!-- Content -->
     <div class="container mt-5" role="main">
       {% if page.toc and page.toc.sidebar %}
-        {% if page.toc.sidebar == 'right' %}
-          <div class="row">
-            <!-- main content area -->
-            <div class="col-sm-9">{{ content }}</div>
-            <!-- sidebar, which will move to the top on a small screen -->
-            <div class="col-sm-3">
-              <nav id="toc-sidebar" class="sticky-top"></nav>
+        <div class="row" id="toc-row">
+          {% unless page.toc.sidebar == 'right' %}
+          <div id="toc-col">
+            <div class="toc-header sticky-top">
+              <div class="toc-title-bar">
+                <span class="toc-label">Index</span>
+                <button id="toc-toggle" title="목차 숨기기">◀</button>
+              </div>
+              <nav id="toc-sidebar"></nav>
             </div>
           </div>
-        {% else %}
-          <div class="row">
-            <!-- sidebar, which will move to the top on a small screen -->
-            <div class="col-sm-3">
-              <nav id="toc-sidebar" class="sticky-top"></nav>
+          {% endunless %}
+          <div id="toc-content">{{ content }}</div>
+          {% if page.toc.sidebar == 'right' %}
+          <div id="toc-col">
+            <div class="toc-header sticky-top">
+              <div class="toc-title-bar">
+                <span class="toc-label">Index</span>
+                <button id="toc-toggle" title="목차 숨기기">◀</button>
+              </div>
+              <nav id="toc-sidebar"></nav>
             </div>
-            <!-- main content area -->
-            <div class="col-sm-9">{{ content }}</div>
           </div>
-        {% endif %}
+          {% endif %}
+        </div>
       {% else %}
         {{ content }}
       {% endif %}
