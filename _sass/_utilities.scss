@@ -27,6 +27,7 @@ pre {
   background-color: var(--global-code-bg-color);
   border-radius: 6px;
   padding: 6px 12px;
+  font-family: "KoPubWorldDotum", "Pretendard Variable", monospace;
 
   // Responsive behavior for code blocks
   overflow-x: auto;
@@ -49,10 +50,18 @@ code {
   background-color: var(--global-code-bg-color);
   border-radius: 3px;
   padding: 3px 3px;
+  font-family: "KoPubWorldDotum", "Pretendard Variable", monospace;
 
   // Inline code should wrap
   white-space: normal;
   word-wrap: break-word;
+}
+
+// Dark mode: code text white
+html[data-theme="dark"] {
+  pre, code {
+    color: #FFFFFF;
+  }
 }
 
 // Progress bars
