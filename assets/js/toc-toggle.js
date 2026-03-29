@@ -3,12 +3,11 @@ document.addEventListener("DOMContentLoaded", function () {
   var tocCol = document.getElementById("toc-col");
   if (!toggleBtn || !tocCol) return;
 
-  // Default collapsed, restore saved state
-  var saved = localStorage.getItem("toc-collapsed");
-  if (saved !== "false") {
-    tocCol.classList.add("collapsed");
-    toggleBtn.textContent = "\u25B6";
-    toggleBtn.title = "목차 펼치기";
+  // HTML default is collapsed. Only expand if user previously chose to.
+  if (localStorage.getItem("toc-collapsed") === "false") {
+    tocCol.classList.remove("collapsed");
+    toggleBtn.textContent = "\u25C0";
+    toggleBtn.title = "목차 숨기기";
   }
 
   toggleBtn.addEventListener("click", function () {
