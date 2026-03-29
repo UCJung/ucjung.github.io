@@ -3,8 +3,9 @@ document.addEventListener("DOMContentLoaded", function () {
   var tocCol = document.getElementById("toc-col");
   if (!toggleBtn || !tocCol) return;
 
-  // Restore saved state
-  if (localStorage.getItem("toc-collapsed") === "true") {
+  // Default collapsed, restore saved state
+  var saved = localStorage.getItem("toc-collapsed");
+  if (saved !== "false") {
     tocCol.classList.add("collapsed");
     toggleBtn.textContent = "\u25B6";
     toggleBtn.title = "목차 펼치기";
